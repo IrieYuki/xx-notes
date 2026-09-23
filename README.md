@@ -9,9 +9,11 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 
 ## 速查笔记
 
+> `My-Python-Study` 仓库里的同名文件只是**链接桩**，改动一律在这里做。
+
 | 笔记 | 内容 |
 |------|------|
-| `note/Python内置函数速查笔记.md` | Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法；索引表在最前，点「用法」直接跳到正文 |
+| `note/Python内置函数速查笔记.md` | **正本（canonical）**。Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法；索引表在最前，点「用法」直接跳到正文 |
 
 这份笔记正是用上面那个技能整理的，可以用同一个脚本验证它（注释必须和真实输出一致）：
 
