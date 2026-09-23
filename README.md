@@ -7,6 +7,20 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 |------|------|
 | `verified-cheatsheet-notes/` | 把速查笔记整理成能长期查阅的形态，并用脚本验证示例注释与真实输出一致 |
 
+## 速查笔记
+
+| 笔记 | 内容 |
+|------|------|
+| `note/Python内置函数速查笔记.md` | Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法；索引表在最前，点「用法」直接跳到正文 |
+
+这份笔记正是用上面那个技能整理的，可以用同一个脚本验证它（注释必须和真实输出一致）：
+
+```bash
+python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内置函数速查笔记.md
+
+# 104 个代码块｜注释比对 271/271 一致｜退出码 0
+```
+
 ## verified-cheatsheet-notes
 
 把「速查笔记」整理成能长期查阅的形态：
