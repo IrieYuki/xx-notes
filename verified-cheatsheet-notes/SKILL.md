@@ -14,6 +14,9 @@ metadata:
 
 # Verified Cheat-Sheet Notes
 
+> 正本仓库：https://github.com/IrieYuki/assisted-learning-skills
+> 本地安装路径：`~/.hermes/skills/note-taking/verified-cheatsheet-notes/`（两边内容保持一致）
+
 For beginner-facing quick-reference notes (速查笔记) whose use case is **「忘了我来查」**：
 the reader jumps from an index, so the index must be topical, the links must land,
 the entry format must be identical everywhere, and every `#` comment must be the
