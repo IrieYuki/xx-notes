@@ -18,6 +18,8 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 | `note/Pandas常用函数速查笔记.md` | Pandas 创建读写 / 查看 / 选择 / 清洗 / 变换 / 分组 / 合并 / 统计 / 时间 / 字符串，52 条用法。**已按新格式整理并校验通过**（pandas 3.0 的 API 变动都标了） |
 | `note/Matplotlib常用函数速查笔记.md` | Matplotlib 画布 / 折线散点柱状直方饼图箱线 / 坐标轴 / 图例 / 子图 / 样式 / 保存，29 条用法。**已按新格式整理并校验通过** |
 | `note/Seaborn常用函数速查笔记.md` | Seaborn 主题 / 关系图 / 分布图 / 分类图 / 回归图 / 矩阵图 / 网格，27 条用法。**已按新格式整理并校验通过** |
+| `note/C语言常用语法速查笔记.md` | C：程序结构 / 数据类型 / 运算符 / 分支循环 / 数组 / 字符串 / 函数 / 指针 / 结构体 / 内存 / 文件 / 标准库 / 预处理，63 条用法。每条都是**完整可编译程序**，`// 运行结果：` 是真实输出 |
+| `note/MySQL常用语法速查笔记.md` | MySQL：建表 / 增删改查 / 条件 / 分组 / 连接 / 子查询 / 更新删除 / 函数 / 索引 / 事务 / 视图，43 条用法。示例下附结果表；MySQL 专有语法明确标注「未实跑」 |
 
 「新格式」＝ 索引前置（目录与速查表合并、每行可跳转）+ 每条统一 `签名 ｜ 返回 ｜ 备注` 三格 +
 代码示例注释必须是真实输出。整理完一份就把状态改成「已整理并校验通过」，并补上它的校验命令与输出。
@@ -44,10 +46,20 @@ python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内�
 # Seaborn 那份（示例用手工小表，离线可跑；load_dataset 那条首次需联网）
 ~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Seaborn常用函数速查笔记.md
 # 28 个代码块｜注释比对 82/82 一致｜退出码 0
+
+# C 那份（编译 + 运行，需要 cc / clang；不需要第三方库）
+python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang c note/C语言常用语法速查笔记.md
+# 63 个 c 代码块｜全部编译运行通过｜退出码 0
+
+# MySQL 那份（可移植语句重新跑一遍并与笔记里的结果表比对；用标准库 sqlite3，不需要 mysql 服务）
+python3 verified-cheatsheet-notes/scripts/verify_sql_blocks.py note/MySQL常用语法速查笔记.md
+# 复核 37 条通过 37 条；跳过 6 条（标了未实跑的 MySQL 专有语法）
 ```
 
-> 5 份笔记全部按新格式整理完毕（2026-09）；除 Python 那份外，其余都要用装了对应库的解释器跑校验：
+> 笔记全部按新格式整理完毕（2026-09）；除 Python 那份外，其余都要用装了对应工具的解释器跑校验：
 > `~/.venv/bin/python`（numpy / pandas / matplotlib / seaborn 都在里面）。
+> C / C++ 那份用系统自带的 `cc` / `c++`；MySQL 那份用 Python 标准库的 sqlite3（本机没有 MySQL 服务，
+> 所以只复核可移植语句，专有语法在笔记里如实标注「未实跑」，不假装验证过）。
 
 ## verified-cheatsheet-notes
 

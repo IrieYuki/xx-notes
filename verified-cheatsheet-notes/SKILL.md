@@ -81,6 +81,16 @@ the entry format must be identical everywhere, and every `#` comment must be the
   例如 `len(ax.lines)` 写成 15 而实际是 4）；
   → 校验器：**每个代码块结束后**同样清理（`reset_plot_state()`），否则一次校验多个笔记时会出现顺序相关的假失败。
 - 表格单元格里写 `|` 要转义成 `\|`，或直接用全角 `｜`。
+- **脚本只留一份正本，别跑副本**：渲染/校验一律用技能目录的绝对路径
+  （`~/.hermes/skills/note-taking/verified-cheatsheet-notes/scripts/...`）。工作区里留的旧副本会**静默**产出不同结果
+  （实例：旧 renderer 不认 `lang`/`out`，渲染出的 SQL 笔记没有结果块，校验器把整份笔记当成「全部跳过」而看着像通过了）。
+- **C / C++ 笔记的约定**：每个代码块是一份**完整可编译的程序**；`// 输入：Tom 18` 那一行就是该块的 stdin
+  （生成器与校验器共用同一规则）；生成器把真实 stdout 写回 `// 运行结果：…`。
+  示例里**不要**打印地址/时间/随机数（每次都不一样，没法校验）——改成打印「相等吗：1」这类布尔结果。
+- **SQL 笔记（本机没数据库时）**：把可移植子集在 SQLite 上真跑，MySQL 专有语法
+  （AUTO_INCREMENT / SHOW / DESCRIBE / DATE_FORMAT / TRUNCATE / GRANT…）结果里写「未实跑」并让校验器跳过 ——
+  **绝不编造结果**。生成器与校验器里的 SCHEMA/SEED 必须逐字一致，否则校验会假报不一致。
+  查询结果渲染成 `列 | 列` + `（共 N 行）`，比对时逐行 rstrip（对齐用的空格不算错）。
 - `from hermes_tools import read_file` 在 execute_code 里返回结构不稳定 → 直接 `open()` 读。
 - 分批生成 + 每批落盘，长脚本被中断也不丢进度。
 
@@ -97,5 +107,8 @@ the entry format must be identical everywhere, and every `#` comment must be the
 
 - `references/entry-format.md` — 条目格式规范、索引表设计、锚点 / slug 规则、排序与「允许重复」策略、生成方式
 - `references/python-inventory.md` — Python 速查笔记的条目骨架（A1–A10 内置函数 + list/str/dict/set/tuple），可套到 Numpy/Pandas/Matplotlib/Seaborn 那几份
-- `scripts/verify_code_blocks.py` — 校验脚本：执行代码块 + 注释与真实输出比对（仅标准库）
+- `scripts/verify_code_blocks.py` — 校验脚本（Python）：执行代码块 + 注释与真实输出比对（仅标准库）
+- `scripts/verify_c_blocks.py` — 校验脚本（C / C++）：**编译 + 运行**代码块，比对尾部 `// 运行结果：` 注释；
+  用法 `python3 scripts/verify_c_blocks.py --lang c NOTE.md` / `--lang cpp`（默认 `cc`/`c++`，`-std=c17`/`c++17`）
+- `scripts/verify_sql_blocks.py` — 校验脚本（SQL）：把 ```sql 块重跑一遍，和紧跟的 ```text 结果块比对
 - `scripts/render_notes.py` — 渲染脚本：JSONL 条目 → 笔记文件（索引/正文/锚点同源，渲染后自查链接与围栏）

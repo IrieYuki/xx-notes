@@ -4,8 +4,10 @@
 用法:  python3 render_notes.py <entries.jsonl> <输出.md>
 
 JSONL 格式：
-  第一行 kind="meta"：{title, intro, tail}
-  其余     kind="entry"：{cat, name, one, sig, ret, note, code, warn?}
+  第一行 kind="meta"：{title, intro, tail, lang?}   # lang = 围栏语言，默认 python（C 写 c、C++ 写 cpp、SQL 写 sql）
+  其余     kind="entry"：{cat, name, one, sig, ret, note, code, warn?, out?}
+          out = 可选的「运行结果」文本，会渲染成紧跟代码块之后的一个 ```text 块
+                （SQL 笔记用它展示查询结果表格）
 
 设计约束（别改成手写正文，否则格式会漂）：
   * 索引表、正文、锚点全部从同一份数据生成 —— 三老永远不会不一致；
@@ -50,6 +52,7 @@ def render(jsonl_path: str, out_path: str) -> dict:
         out.append(f"| {e['cat'].replace(chr(0x3000), ' ')} | [`{e['name']}`](#{slug(h_of(e))}) | {e['one']} |")
     out.append("\n---\n")
 
+    fence = meta.get("lang", "python")
     cur = None
     for e in entries:
         if e["cat"] != cur:
@@ -57,9 +60,15 @@ def render(jsonl_path: str, out_path: str) -> dict:
             out.append(f"## {cur}\n")
         out.append(f"### {h_of(e)}\n")
         out.append(f"**签名** {e['sig']} ｜ **返回** {e['ret']} ｜ **备注** {e['note']}\n")
-        out.append("```python")
+        out.append(f"```{fence}")
         out.append(e["code"])
         out.append("```\n")
+        if e.get("alt"):
+            out.append(f"<!-- 校验等价写法（SQLite）：{e['alt']} -->\n")
+        if e.get("out"):
+            out.append("```text")
+            out.append(e["out"].strip("\n"))
+            out.append("```\n")
         if e.get("warn"):
             out.append(f"> ⚠️ {e['warn']}\n")
 
