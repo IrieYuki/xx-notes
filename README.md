@@ -19,6 +19,7 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 | `note/Matplotlib常用函数速查笔记.md` | Matplotlib 画布 / 折线散点柱状直方饼图箱线 / 坐标轴 / 图例 / 子图 / 样式 / 保存，29 条用法。**已按新格式整理并校验通过** |
 | `note/Seaborn常用函数速查笔记.md` | Seaborn 主题 / 关系图 / 分布图 / 分类图 / 回归图 / 矩阵图 / 网格，27 条用法。**已按新格式整理并校验通过** |
 | `note/C语言常用语法速查笔记.md` | C：程序结构 / 数据类型 / 运算符 / 分支循环 / 数组 / 字符串 / 函数 / 指针 / 结构体 / 内存 / 文件 / 标准库 / 预处理，63 条用法。每条都是**完整可编译程序**，`// 运行结果：` 是真实输出 |
+| `note/C++常用语法速查笔记.md` | C++：输入输出 / auto 与引用 / std::string / 函数进阶 / 类与对象 / 继承多态 / 运算符重载 / STL 容器与算法 / 智能指针 / 异常 / 文件流 / 现代特性，55 条用法。同样每条都是完整可编译程序 |
 | `note/MySQL常用语法速查笔记.md` | MySQL：建表 / 增删改查 / 条件 / 分组 / 连接 / 子查询 / 更新删除 / 函数 / 索引 / 事务 / 视图，43 条用法。示例下附结果表；MySQL 专有语法明确标注「未实跑」 |
 
 「新格式」＝ 索引前置（目录与速查表合并、每行可跳转）+ 每条统一 `签名 ｜ 返回 ｜ 备注` 三格 +
@@ -50,6 +51,10 @@ python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内�
 # C 那份（编译 + 运行，需要 cc / clang；不需要第三方库）
 python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang c note/C语言常用语法速查笔记.md
 # 63 个 c 代码块｜全部编译运行通过｜退出码 0
+
+# C++ 那份（同上，编译器换成 c++ -std=c++17）
+python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang cpp note/C++常用语法速查笔记.md
+# 55 个 cpp 代码块｜全部编译运行通过｜退出码 0
 
 # MySQL 那份（可移植语句重新跑一遍并与笔记里的结果表比对；用标准库 sqlite3，不需要 mysql 服务）
 python3 verified-cheatsheet-notes/scripts/verify_sql_blocks.py note/MySQL常用语法速查笔记.md
