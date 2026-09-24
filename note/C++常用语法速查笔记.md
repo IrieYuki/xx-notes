@@ -467,7 +467,7 @@ int main() {
 // 替换后：I love C艹 and C++ is fun
 ```
 
-> ⚠️ `substr` 的下标越界不会报错但会抛 `std::out_of_range`；`find` 的结果一定要和 `string::npos` 比过再用。
+> ⚠️ `substr(起点)` 的起点**超出字符串长度**会抛 `std::out_of_range`（等于长度是合法的，得到空串）；第二个参数（长度）给多了不报错，只会截到末尾。`find` 找不到时返回 `string::npos`，用之前一定要比一下。
 
 ### `string 比较、取字符与清空` 按字典序比较 / 读改写单个字符 / clear
 
