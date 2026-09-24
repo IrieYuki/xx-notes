@@ -15,7 +15,7 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 |------|------|
 | `note/Python内置函数速查笔记.md` | Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法。**已按新格式整理并校验通过**（索引表在最前，点「用法」直接跳到正文） |
 | `note/Numpy常用函数速查笔记.md` | NumPy 创建 / 索引 / 变形 / 运算 / 统计 / 拼接 / 线代，49 条用法。**已按新格式整理并校验通过** |
-| `note/Pandas常用函数速查笔记.md` | Pandas 常用函数。**待按新格式整理** |
+| `note/Pandas常用函数速查笔记.md` | Pandas 创建读写 / 查看 / 选择 / 清洗 / 变换 / 分组 / 合并 / 统计 / 时间 / 字符串，52 条用法。**已按新格式整理并校验通过**（pandas 3.0 的 API 变动都标了） |
 | `note/Matplotlib常用函数速查笔记.md` | Matplotlib 常用函数。**待按新格式整理** |
 | `note/Seaborn常用函数速查笔记.md` | Seaborn 常用函数。**待按新格式整理** |
 
@@ -32,6 +32,10 @@ python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内�
 # Numpy 那份（示例里有 np.array(...)，要用装了 numpy 的解释器跑）
 ~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Numpy常用函数速查笔记.md
 # 49 个代码块｜注释比对 178/178 一致｜退出码 0
+
+# Pandas 那份（用装了 pandas 的解释器）
+~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Pandas常用函数速查笔记.md
+# 52 个代码块｜注释比对 164/164 一致｜退出码 0
 ```
 
 ## verified-cheatsheet-notes
