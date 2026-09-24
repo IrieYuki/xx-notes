@@ -18,6 +18,9 @@
     f"{x:.2f}"         # '3.14'（两位）   括号里的中文注解会被忽略
 
 局限：只检查顶层语句；`for`/`if`/`def` 内部的注释不比对（它们要整体执行）。
+库笔记（numpy 等）：注释写成 `# array([1, 2, 3])` / `# dtype('int64')` 也能自动比对，
+但要用装了该库的解释器跑脚本（例：`~/.venv/bin/python scripts/verify_code_blocks.py ...`），
+且不要依赖被 `...` 截断的长数组注释（会被跳过）。
 """
 
 from __future__ import annotations
@@ -63,21 +66,96 @@ def comments_of(code: str):
     return res
 
 
-def expected_value(comment: str):
-    """从注释里解析出期望值；解析不出来（说明性文字）返回 None。"""
-    c = comment.lstrip("#").strip()
-    if not c or c.startswith("❌"):
-        return None
-    if "→" in c:
-        c = c.split("→")[-1].strip()
-    c = re.split(r"[（(]", c)[0].strip()
-    c = re.sub(r"^(即|等于|返回|输出)\s*", "", c).strip()
-    if not c:
-        return None
+def _numpy_ns():
+    """numpy 风格注释（array([...]) / dtype('int64')）的求值命名空间；没装 numpy 就返回 None。"""
     try:
-        return ast.literal_eval(c)
+        import numpy as np
     except Exception:
         return None
+    return {"array": np.array, "np": np, "dtype": np.dtype, "nan": np.nan, "inf": np.inf,
+            "float16": np.float16, "float32": np.float32, "float64": np.float64,
+            "int32": np.int32, "int64": np.int64, "bool_": np.bool_,
+            "True": True, "False": False, "None": None}
+
+
+def equal(a, b) -> bool:
+    """值相等判断：numpy 数组用 array_equal（忽略 dtype 差异），其余用 ==。"""
+    try:
+        import numpy as np
+        if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
+            return bool(np.array_equal(a, b))
+    except Exception:
+        pass
+    try:
+        return bool(a == b)
+    except Exception:
+        return False
+
+
+_MISS = object()
+_SKIPPED_NUMPY: list = []
+
+
+def _try_parse(s: str):
+    """解析成值；解析不出来返回 _MISS。支持字面量与 numpy 写法（array([...]) / dtype('int64')）。"""
+    try:
+        return ast.literal_eval(s)
+    except Exception:
+        pass
+    # numpy 形式：array(...) / dtype(...) / 以 [ { ( 开头但里面含 array(...) 的（如 split 返回的 list）
+    looks_numpy = re.match(r"^(array|np\.|dtype)", s) or ("array(" in s and s[:1] in "[({}")
+    if looks_numpy:
+        ns = _numpy_ns()
+        if ns:
+            try:
+                return eval(s, ns)
+            except Exception:
+                pass
+        else:
+            _SKIPPED_NUMPY.append(s)
+    return _MISS
+
+
+def one_line(v) -> str:
+    """值的单行 repr（numpy 多维数组会换行，折成一行，便于比对与显示）。"""
+    try:
+        return " ".join(repr(v).split())
+    except Exception:
+        return "<无法repr>"
+
+
+def expected_candidates(comment: str):
+    """返回 (期望值, 期望文本)；文本为 None 表示这行不做比对。
+
+    顺序很重要：先按原样试（否则 `# array([1, 2, 3])` 会被「去括号注解」那步截成 `array`），
+    再去掉「→ 后面的部分」与「中文括号注解」重试。
+    """
+    c = comment.lstrip("#").strip()
+    if not c or c.startswith("❌") or "..." in c:   # ❌ = 预期报错；... = numpy 截断值
+        return None, None
+    v = _try_parse(c)
+    if v is not _MISS:
+        return v, c
+    tail = c.split("→")[-1].strip() if "→" in c else c
+    tail = re.split(r"[（(]", tail)[0].strip()
+    tail = re.sub(r"^(即|等于|返回|输出)\s*", "", tail).strip()
+    if tail and tail != c:
+        v = _try_parse(tail)
+        if v is not _MISS:
+            return v, tail
+    return None, None
+
+
+def matches(got, exp_val, exp_text: str) -> bool:
+    """两级比对：
+    ① 注释文本就是真实 repr（numpy 默认只显示 8 位小数，数值比对会误报）；
+    ② 解析出的期望值与原值语义相等（列表/元组/集合这类用 equality）。
+    """
+    if one_line(got) == " ".join(exp_text.split()):
+        return True
+    if exp_val is not None:
+        return equal(got, exp_val)
+    return False
 
 
 def receiver_of(node):
@@ -114,33 +192,35 @@ def check_block(code: str):
     for node in tree.body:
         seg = ast.get_source_segment(code, node) or ""
         head = seg.splitlines()[0][:70] if seg else ""
-        exp = expected_value(cmts[node.end_lineno]) if node.end_lineno in cmts else None
+        exp, exp_text = expected_candidates(cmts[node.end_lineno]) if node.end_lineno in cmts else (None, None)
         try:
             with contextlib.redirect_stdout(io.StringIO()):
                 if isinstance(node, ast.Expr):
                     src = ast.unparse(node)
                     value = eval(src, ns)                      # 副作用只发生一次
-                    if exp is None:
+                    if exp_text is None:
                         continue
                     if value is not None:
                         n_checked += 1
-                        if value != exp:
-                            mismatches.append(f"{src}  → 注释 {exp!r}，实际 {value!r}")
+                        if not matches(value, exp, exp_text):
+                            mismatches.append(f"{src}  → 注释 {exp_text}，实际 {one_line(value)}")
+                    elif matches(value, exp, exp_text):
+                        n_checked += 1        # 表达式确实返回 None，而注释写的就是 None
                     else:
                         name = receiver_of(node)
                         if name and name in ns:
                             n_checked += 1
-                            if ns[name] != exp:
-                                mismatches.append(f"{src}  → 注释 {exp!r}，实际 {ns[name]!r}")
+                            if not matches(ns[name], exp, exp_text):
+                                mismatches.append(f"{src}  → 注释 {exp_text}，实际 {one_line(ns[name])}")
                 else:
                     exec(compile(ast.Module([node], []), "<block>", "exec"), ns)
-                    if exp is None:
+                    if exp_text is None:
                         continue
                     name = receiver_of(node)
                     if name and name in ns:
                         n_checked += 1
-                        if ns[name] != exp:
-                            mismatches.append(f"{head}  → 注释 {exp!r}，实际 {ns[name]!r}")
+                        if not matches(ns[name], exp, exp_text):
+                            mismatches.append(f"{head}  → 注释 {exp_text}，实际 {one_line(ns[name])}")
         except EOFError:
             errors.append(f"{head}  ← input() 还需要更多假 stdin（往 STDIN_LINES 里加行）")
         except Exception as ex:
@@ -188,6 +268,9 @@ def main() -> int:
             contextlib.suppress(OSError) and __import__("shutil").rmtree(tmp, ignore_errors=True)
 
     print(f"\n合计：比对 {total_checked} 项，不一致 {total_bad} 项，有问题的文件 {bad_files} 个")
+    if _SKIPPED_NUMPY:
+        print(f"提示：{len(_SKIPPED_NUMPY)} 条 numpy 形式注释被跳过 —— 当前解释器没装 numpy。"
+              f"换装了库的解释器重跑，例如 ~/.venv/bin/python {__file__} <笔记.md>")
     return 1 if total_bad else 0
 
 

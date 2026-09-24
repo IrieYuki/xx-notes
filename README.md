@@ -14,7 +14,7 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 | 笔记 | 内容 / 状态 |
 |------|------|
 | `note/Python内置函数速查笔记.md` | Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法。**已按新格式整理并校验通过**（索引表在最前，点「用法」直接跳到正文） |
-| `note/Numpy常用函数速查笔记.md` | NumPy 常用函数。**待按新格式整理** |
+| `note/Numpy常用函数速查笔记.md` | NumPy 创建 / 索引 / 变形 / 运算 / 统计 / 拼接 / 线代，49 条用法。**已按新格式整理并校验通过** |
 | `note/Pandas常用函数速查笔记.md` | Pandas 常用函数。**待按新格式整理** |
 | `note/Matplotlib常用函数速查笔记.md` | Matplotlib 常用函数。**待按新格式整理** |
 | `note/Seaborn常用函数速查笔记.md` | Seaborn 常用函数。**待按新格式整理** |
@@ -25,9 +25,13 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 校验已整理的笔记（以下命令针对 Python 那份，可直接跑）：
 
 ```bash
+# Python 那份（只依赖标准库，任何解释器都行）
 python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内置函数速查笔记.md
+# 104 个代码块｜注释比对 284/284 一致｜退出码 0
 
-# 104 个代码块｜注释比对 271/271 一致｜退出码 0
+# Numpy 那份（示例里有 np.array(...)，要用装了 numpy 的解释器跑）
+~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Numpy常用函数速查笔记.md
+# 49 个代码块｜注释比对 178/178 一致｜退出码 0
 ```
 
 ## verified-cheatsheet-notes

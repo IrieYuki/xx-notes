@@ -63,6 +63,10 @@ the entry format must be identical everywhere, and every `#` comment must be the
 
 - 示例里的 `input()` 会让校验脚本永久挂住 → 脚本按代码块喂假 stdin；
   连续多次 `input()` 不能每句都喂同一行，否则 `int("Tom")` 会造出**假失败**。
+- **库笔记（numpy / pandas / matplotlib / seaborn）必须用装了该库的解释器跑校验**
+  （例：`~/.venv/bin/python scripts/verify_code_blocks.py note/Numpy常用函数速查笔记.md`），
+  否则注释会被静默跳过（脚本现在会提示跳过了多少条）。生成示例注释时也走同一个解释器，
+  让注释直接来自真实 repr —— 手写库的输出很容易错，而且版本一变就错。
 - `open(...,"w")` 之类示例会往当前目录落文件 → 脚本默认在临时目录里执行代码块。
 - 比较注释要按**解析后的字面量**相等比，不要字符串比：dict/set 的 repr 顺序不稳，浮点 repr 有坑。
 - 生成脚本里别用反引号当字符串定界符（会 `SyntaxError: invalid character '：'`）；
