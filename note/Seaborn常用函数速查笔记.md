@@ -152,9 +152,9 @@ df = pd.DataFrame({"day": ["Thur", "Fri", "Sat", "Sun"] * 4,
                    "size": [2, 3, 4, 2, 2, 5, 3, 2, 4, 3, 2, 3, 6, 2, 4, 5]})
 ax = sns.lineplot(data=df, x="day", y="bill", hue="sex")
 type(ax).__name__                           # 'Axes'
-len(ax.lines)                               # 15
+len(ax.lines)                               # 4
 ax2 = sns.lineplot(data=df, x="day", y="bill", errorbar=None)
-len(ax2.lines)                              # 16
+len(ax2.lines)                              # 5
 ```
 
 > ⚠️ **同一个 x 有多条数据时，Seaborn 会自动画均值 + 置信区间阴影**（这和 `plt.plot` 直接连线完全不同）。不要阴影就传 `errorbar=None`；老教程里的 `ci=None` 还能用但**已过时**。
@@ -205,7 +205,7 @@ ax = sns.histplot(data=df, x="bill", bins=5)
 type(ax).__name__                           # 'Axes'
 len(ax.patches)                             # 5
 ax2 = sns.histplot(data=df, x="bill", bins=5, kde=True)
-len(ax2.lines)                              # 2
+len(ax2.lines)                              # 1
 ```
 
 > ⚠️ `bins` 是箱数（也可传边界列表）；`kde=True` 叠一条核密度曲线（`ax.lines` 里会多出来）。`stat="density"` 换纵轴含义，`hue=` 分组（**分组时纵轴会自动变成 count 叠加**）。
@@ -251,9 +251,9 @@ df = pd.DataFrame({"day": ["Thur", "Fri", "Sat", "Sun"] * 4,
                    "size": [2, 3, 4, 2, 2, 5, 3, 2, 4, 3, 2, 3, 6, 2, 4, 5]})
 ax = sns.ecdfplot(data=df, x="bill")
 type(ax).__name__                           # 'Axes'
-len(ax.lines)                               # 3
+len(ax.lines)                               # 1
 ax2 = sns.rugplot(data=df, x="bill")
-len(ax2.collections)                        # 4
+len(ax2.collections)                        # 1
 ```
 
 > ⚠️ `ecdfplot` 画经验累积分布（看「低于某值的比例」，比直方图更客观、不受 `bins` 影响）；`rugplot` 画坐标轴上的小刻度（**是线段集合，在 `ax.collections` 里而不是 `ax.lines`**），常叠加在别的图下面展示原始数据分布。
@@ -350,10 +350,10 @@ df = pd.DataFrame({"day": ["Thur", "Fri", "Sat", "Sun"] * 4,
                    "size": [2, 3, 4, 2, 2, 5, 3, 2, 4, 3, 2, 3, 6, 2, 4, 5]})
 ax = sns.countplot(data=df, x="day")
 type(ax).__name__                           # 'Axes'
-[len(c) for c in ax.containers]             # [4, 4, 4, 4]
+[len(c) for c in ax.containers]             # [4]
 df["day"].value_counts().to_dict()          # {'Thur': 4, 'Fri': 4, 'Sat': 4, 'Sun': 4}
 ax2 = sns.countplot(data=df, x="day", hue="sex")
-[len(c) for c in ax2.containers]            # [4, 4, 4, 4, 4, 4]
+[len(c) for c in ax2.containers]            # [4, 4, 4]
 ```
 
 > ⚠️ 只给 `x`（或只给 `y`）就看类别频数；`hue=` 分组后**每个组各画一层柱子**（`[len(c) for c in ax.containers]` 就是每层柱子数）。类别太多时用横向（只给 `y=`）更清楚。
@@ -420,7 +420,7 @@ df = pd.DataFrame({"day": ["Thur", "Fri", "Sat", "Sun"] * 4,
                    "size": [2, 3, 4, 2, 2, 5, 3, 2, 4, 3, 2, 3, 6, 2, 4, 5]})
 ax = sns.boxenplot(data=df, x="day", y="bill")
 type(ax).__name__                           # 'Axes'
-len(ax.patches) > 0                         # True
+len(ax.patches) > 0                         # False
 ```
 
 > ⚠️ 比箱线图多画若干分位数（更像分布形状），**样本量大时**比 `boxplot` 信息更多；样本量小时两者差不多。
@@ -514,7 +514,7 @@ df = pd.DataFrame({"day": ["Thur", "Fri", "Sat", "Sun"] * 4,
                    "size": [2, 3, 4, 2, 2, 5, 3, 2, 4, 3, 2, 3, 6, 2, 4, 5]})
 ax = sns.residplot(data=df, x="bill", y="tip")
 type(ax).__name__                           # 'Axes'
-len(ax.collections)                         # 3
+len(ax.collections)                         # 1
 ```
 
 > ⚠️ 残差 = 真实值 − 预测值。**如果残差呈现 U 形/喇叭形，说明线性模型不合适**（该换非线性或加特征）；随机散布在 0 两侧才说明线性拟合可以接受。
@@ -540,7 +540,7 @@ corr = df[["bill", "tip", "size"]].corr()
 ax = sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", square=True)
 type(ax).__name__                           # 'Axes'
 len(ax.texts)                               # 9
-len(ax.collections)                         # 4
+len(ax.collections)                         # 1
 ```
 
 > ⚠️ `annot=True` 把数字写在格子里（`fmt` 控制小数位）；`square=True` 让格子变正方向；`vmin`/`vmax` 固定色阶范围（**比较两张热力图时必须设成一样**）。注意：`df.corr()` 在 pandas 3 里遇到字符串列要 `numeric_only=True`。

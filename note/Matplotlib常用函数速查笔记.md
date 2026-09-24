@@ -424,7 +424,7 @@ plt.subplot(2, 2, 1)
 plt.plot(x, np.sin(x))
 plt.subplot(2, 2, 2)
 plt.plot(x, np.cos(x))
-len(plt.gcf().axes)                           # 3
+len(plt.gcf().axes)                           # 2
 plt.close("all")
 ```
 

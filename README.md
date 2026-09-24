@@ -63,7 +63,7 @@ python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内�
 python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py /path/to/笔记.md
 
 # 实例：对 My-Python-Study 仓库的 Python 速查笔记
-#   104 个代码块｜注释比对 271/271 一致｜退出码 0
+#   104 个代码块｜注释比对 284/284 一致｜退出码 0
 ```
 
 它逐块执行 Markdown 里的 python 代码块，把 `#` 注释解析成期望值再和真实求值结果比对：

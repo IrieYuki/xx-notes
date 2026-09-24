@@ -18,9 +18,12 @@
     f"{x:.2f}"         # '3.14'（两位）   括号里的中文注解会被忽略
 
 局限：只检查顶层语句；`for`/`if`/`def` 内部的注释不比对（它们要整体执行）。
-库笔记（numpy 等）：注释写成 `# array([1, 2, 3])` / `# dtype('int64')` 也能自动比对，
+库笔记（numpy / pandas / matplotlib / seaborn）：注释写成 `# array([1, 2, 3])` / `# dtype('int64')` 也能自动比对，
 但要用装了该库的解释器跑脚本（例：`~/.venv/bin/python scripts/verify_code_blocks.py ...`），
 且不要依赖被 `...` 截断的长数组注释（会被跳过）。
+绘图笔记：脚本默认把后端设为 Agg（不弹窗），并**在每个代码块结束后关图 + 重置 rcParams**，
+否则前一个块画过的图/改过的全局样式会让后面的块出现顺序相关的假失败：
+一次校验多个笔记时尤其明显（建议仍然一次只跑一个笔记，输出更好读）。
 """
 
 from __future__ import annotations
@@ -33,6 +36,7 @@ import os
 import re
 import sys
 import tempfile
+import textwrap
 import tokenize
 from pathlib import Path
 
@@ -41,7 +45,7 @@ STDIN_LINES = ["Tom", "18", "1 2 3", "42", "7 8 9", "5"]
 
 
 def extract_blocks(md_text: str, lang: str = "python"):
-    """返回 [(起始行号, 代码)]"""
+    """返回 [(起始行号, 代码)]。缩进在列表里的代码块会先 dedent（否则会误报 unexpected indent）。"""
     out, lines, i = [], md_text.split("\n"), 0
     while i < len(lines):
         m = re.match(r"^\s*```(\w*)", lines[i])
@@ -50,7 +54,7 @@ def extract_blocks(md_text: str, lang: str = "python"):
             while i < len(lines) and not re.match(r"^\s*```\s*$", lines[i]):
                 buf.append(lines[i])
                 i += 1
-            out.append((start, "\n".join(buf)))
+            out.append((start, textwrap.dedent("\n".join(buf))))
         i += 1
     return out
 
@@ -228,12 +232,33 @@ def check_block(code: str):
     return n_checked, mismatches, errors
 
 
+def reset_plot_state():
+    """清掉绘图库的**全局状态**。
+
+    matplotlib / seaborn 把 rcParams、当前 figure 放在模块级全局里，一个代码块画的图会影响下一个块：
+    例如某块 set_xlabel("X") 后，下一个没建 figure 的 seaborn 块会画到那个轴上，
+    导致「注释 vs 实际」出现与顺序相关的**假失败**。每块结束后关图 + 恢复 rcParams 默认值。
+    """
+    plt = sys.modules.get("matplotlib.pyplot")
+    if plt is None:
+        return
+    try:
+        plt.close("all")
+        import matplotlib
+        matplotlib.rcdefaults()
+    except Exception:
+        pass
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="校验 Markdown 代码块的注释与真实输出是否一致")
     ap.add_argument("files", nargs="+")
     ap.add_argument("--lang", default="python")
     ap.add_argument("--keep-cwd", action="store_true", help="在当前目录执行代码块（默认在临时目录）")
     args = ap.parse_args()
+
+    # 绘图类笔记：强制无界面后端，避免 plt.show() 弹窗/阻塞校验
+    os.environ.setdefault("MPLBACKEND", "Agg")
 
     origin = os.getcwd()
     tmp = None
@@ -251,6 +276,7 @@ def main() -> int:
             print(f"\n== {f}｜{args.lang} 代码块 {len(bl)} 个 ==")
             for start, code in bl:
                 checked, mismatches, errors = check_block(code)
+                reset_plot_state()          # 防止绘图全局状态跨块污染（假失败）
                 n_checked += checked
                 n_bad += len(mismatches)
                 for mm in mismatches:
