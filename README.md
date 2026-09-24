@@ -17,7 +17,7 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 | `note/Numpy常用函数速查笔记.md` | NumPy 创建 / 索引 / 变形 / 运算 / 统计 / 拼接 / 线代，49 条用法。**已按新格式整理并校验通过** |
 | `note/Pandas常用函数速查笔记.md` | Pandas 创建读写 / 查看 / 选择 / 清洗 / 变换 / 分组 / 合并 / 统计 / 时间 / 字符串，52 条用法。**已按新格式整理并校验通过**（pandas 3.0 的 API 变动都标了） |
 | `note/Matplotlib常用函数速查笔记.md` | Matplotlib 画布 / 折线散点柱状直方饼图箱线 / 坐标轴 / 图例 / 子图 / 样式 / 保存，29 条用法。**已按新格式整理并校验通过** |
-| `note/Seaborn常用函数速查笔记.md` | Seaborn 常用函数。**待按新格式整理** |
+| `note/Seaborn常用函数速查笔记.md` | Seaborn 主题 / 关系图 / 分布图 / 分类图 / 回归图 / 矩阵图 / 网格，27 条用法。**已按新格式整理并校验通过** |
 
 「新格式」＝ 索引前置（目录与速查表合并、每行可跳转）+ 每条统一 `签名 ｜ 返回 ｜ 备注` 三格 +
 代码示例注释必须是真实输出。整理完一份就把状态改成「已整理并校验通过」，并补上它的校验命令与输出。
@@ -40,7 +40,14 @@ python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内�
 # Matplotlib 那份（绘图示例：脚本会把后端设成 Agg，不会弹窗）
 ~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Matplotlib常用函数速查笔记.md
 # 30 个代码块｜注释比对 76/76 一致（其余是纯绘图语句，编译执行无异常即可）｜退出码 0
+
+# Seaborn 那份（示例用手工小表，离线可跑；load_dataset 那条首次需联网）
+~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Seaborn常用函数速查笔记.md
+# 28 个代码块｜注释比对 82/82 一致｜退出码 0
 ```
+
+> 5 份笔记全部按新格式整理完毕（2026-09）；除 Python 那份外，其余都要用装了对应库的解释器跑校验：
+> `~/.venv/bin/python`（numpy / pandas / matplotlib / seaborn 都在里面）。
 
 ## verified-cheatsheet-notes
 
