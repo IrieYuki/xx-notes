@@ -9,13 +9,20 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 
 ## 速查笔记
 
-> `My-Python-Study` 仓库里的同名文件只是**链接桩**，改动一律在这里做。
+> 本仓库是速查笔记的**正本**；`My-Python-Study` 里的同名文件只是链接桩，改动一律在这里做。
 
-| 笔记 | 内容 |
+| 笔记 | 内容 / 状态 |
 |------|------|
-| `note/Python内置函数速查笔记.md` | **正本（canonical）**。Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法；索引表在最前，点「用法」直接跳到正文 |
+| `note/Python内置函数速查笔记.md` | Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法。**已按新格式整理并校验通过**（索引表在最前，点「用法」直接跳到正文） |
+| `note/Numpy常用函数速查笔记.md` | NumPy 常用函数。**待按新格式整理** |
+| `note/Pandas常用函数速查笔记.md` | Pandas 常用函数。**待按新格式整理** |
+| `note/Matplotlib常用函数速查笔记.md` | Matplotlib 常用函数。**待按新格式整理** |
+| `note/Seaborn常用函数速查笔记.md` | Seaborn 常用函数。**待按新格式整理** |
 
-这份笔记正是用上面那个技能整理的，可以用同一个脚本验证它（注释必须和真实输出一致）：
+「新格式」＝ 索引前置（目录与速查表合并、每行可跳转）+ 每条统一 `签名 ｜ 返回 ｜ 备注` 三格 +
+代码示例注释必须是真实输出。整理完一份就把状态改成「已整理并校验通过」，并补上它的校验命令与输出。
+
+校验已整理的笔记（以下命令针对 Python 那份，可直接跑）：
 
 ```bash
 python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内置函数速查笔记.md
