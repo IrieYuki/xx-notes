@@ -55,16 +55,44 @@ INSERT INTO scores VALUES (1, 1, 92), (1, 2, 88), (2, 1, 78), (3, 1, 85), (4, 2,
 """
 
 
+def _rewrite_concat(sql: str) -> str:
+    """把 CONCAT(a, b, ...) 改写成 (a || b || ...)，正确处理嵌套括号（与生成器同一实现）。
+
+    别依赖 SQLite 自带的 concat()：那是 3.44+ 才有的函数，不同解释器带的版本可能没有。
+    """
+    out, i, low = [], 0, sql.lower()
+    while True:
+        j = low.find("concat(", i)
+        if j == -1:
+            out.append(sql[i:])
+            break
+        out.append(sql[i:j])
+        k, depth, args, cur = j + len("concat("), 1, [], []
+        while k < len(sql):
+            ch = sql[k]
+            if ch == "(":
+                depth += 1
+                cur.append(ch)
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+                cur.append(ch)
+            elif ch == "," and depth == 1:
+                args.append("".join(cur))
+                cur = []
+            else:
+                cur.append(ch)
+            k += 1
+        args.append("".join(cur))
+        out.append("(" + " || ".join(_rewrite_concat(a.strip()) for a in args) + ")")
+        i = k + 1
+    return "".join(out)
+
+
 def translate(sql: str) -> str:
     sql = re.sub(r"START\s+TRANSACTION", "BEGIN", sql, flags=re.I)
-    for _ in range(3):
-        new = re.sub(r"CONCAT\(([^()]*)\)",
-                     lambda m: "(" + " || ".join(a.strip() for a in m.group(1).split(",")) + ")",
-                     sql, flags=re.I)
-        if new == sql:
-            break
-        sql = new
-    return sql
+    return _rewrite_concat(sql)
 
 
 def _fmt(v):

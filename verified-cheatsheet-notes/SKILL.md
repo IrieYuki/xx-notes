@@ -91,6 +91,11 @@ the entry format must be identical everywhere, and every `#` comment must be the
   （AUTO_INCREMENT / SHOW / DESCRIBE / DATE_FORMAT / TRUNCATE / GRANT…）结果里写「未实跑」并让校验器跳过 ——
   **绝不编造结果**。生成器与校验器里的 SCHEMA/SEED 必须逐字一致，否则校验会假报不一致。
   查询结果渲染成 `列 | 列` + `（共 N 行）`，比对时逐行 rstrip（对齐用的空格不算错）。
+- **不同解释器带的 SQLite 版本不一样，别依赖新版才有的函数**：本机 `python3` 是 3.42、`~/.venv/bin/python` 是 3.50，
+  而 `concat()` 是 3.44+ 才内置的 —— 于是「正则没把 MySQL 的 `CONCAT(a, b)` 翻成 `a || b`」这个 bug
+  在 venv 里被新函数遮住了，换系统解释器才暴露（`no such function: CONCAT`）。
+  教训：翻译函数要处理嵌套括号（`CONCAT('编号-', CAST(7 AS CHAR))` 的参数里有括号，纯正则躲不过），
+  且校验至少用两种解释器各跑一遍。
 - `from hermes_tools import read_file` 在 execute_code 里返回结构不稳定 → 直接 `open()` 读。
 - 分批生成 + 每批落盘，长脚本被中断也不丢进度。
 
