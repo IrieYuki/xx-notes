@@ -92,3 +92,4 @@ the entry format must be identical everywhere, and every `#` comment must be the
 - `references/entry-format.md` — 条目格式规范、索引表设计、锚点 / slug 规则、排序与「允许重复」策略、生成方式
 - `references/python-inventory.md` — Python 速查笔记的条目骨架（A1–A10 内置函数 + list/str/dict/set/tuple），可套到 Numpy/Pandas/Matplotlib/Seaborn 那几份
 - `scripts/verify_code_blocks.py` — 校验脚本：执行代码块 + 注释与真实输出比对（仅标准库）
+- `scripts/render_notes.py` — 渲染脚本：JSONL 条目 → 笔记文件（索引/正文/锚点同源，渲染后自查链接与围栏）
