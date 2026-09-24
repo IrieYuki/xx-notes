@@ -74,6 +74,12 @@ the entry format must be identical everywhere, and every `#` comment must be the
 - 同一段示例里的注释要**统一口径**：要么都写整个容器（`# {'a': 100, 'b': 2}`），要么都写元素值；
   混着写会让读者看错，也会让校验脚本报假不一致（真实案例：`d["a"] += 1  # 100` 被脚本抓出来，
   已改成容器形式）。
+- **绘图笔记（matplotlib / seaborn）的全局状态会跨块泄漏**：当前 figure、rcParams 都存在模块级全局里，
+  所以「没自己建 figure 的示例」（如 `sns.scatterplot(...)`）会画到上一块留下的轴上，`ax.lines`、
+  `ax.containers`、`gcf().axes` 等计数会**累加**。
+  → 生成器：**每个条目开始前** `plt.close("all")` + `matplotlib.rcdefaults()`（否则注释会写成累加后的数字，
+  例如 `len(ax.lines)` 写成 15 而实际是 4）；
+  → 校验器：**每个代码块结束后**同样清理（`reset_plot_state()`），否则一次校验多个笔记时会出现顺序相关的假失败。
 - 表格单元格里写 `|` 要转义成 `\|`，或直接用全角 `｜`。
 - `from hermes_tools import read_file` 在 execute_code 里返回结构不稳定 → 直接 `open()` 读。
 - 分批生成 + 每批落盘，长脚本被中断也不丢进度。
