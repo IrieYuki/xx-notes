@@ -19,112 +19,112 @@
 
 ## 索引 · 速查表
 
-| 分类 | 用法（点击跳转） | 一句话作用 |
-|------|------------------|-----------|
-| A1 类型转换 | [`int(x, base=10)`](#intx-base10-字符串数字--整数可指定进制) | 字符串/数字 → 整数，可指定进制 |
-| A1 类型转换 | [`float(x)`](#floatx-字符串数字--浮点数) | 字符串/数字 → 浮点数 |
-| A1 类型转换 | [`str(object)`](#strobject-任意对象--字符串) | 任意对象 → 字符串 |
-| A1 类型转换 | [`bool(x)`](#boolx-任意值--true--false) | 任意值 → True / False |
-| A1 类型转换 | [`list()、tuple()、set()、dict()`](#listtuplesetdict-四种容器互转) | 四种容器互转 |
-| A1 类型转换 | [`chr(i)、ord(c)`](#chriordc-整数--字符unicode-码点) | 整数 ↔ 字符（Unicode 码点） |
-| A1 类型转换 | [`hex(x)、oct(x)、bin(x)`](#hexxoctxbinx-整数--带前缀的进制字符串) | 整数 → 带前缀的进制字符串 |
-| A2 数学与数值 | [`abs(x)`](#absx-绝对值复数是模长) | 绝对值（复数是模长） |
-| A2 数学与数值 | [`round(x, ndigits=0)`](#roundx-ndigits0-四舍五入银行家舍入) | 四舍五入（银行家舍入） |
-| A2 数学与数值 | [`pow(x, y, mod=None)`](#powx-y-modnone-幂运算可带取模) | 幂运算，可带取模 |
-| A2 数学与数值 | [`divmod(a, b)`](#divmoda-b-一次拿到商和余数) | 一次拿到商和余数 |
-| A3 聚合与判断 | [`len(s)`](#lens-长度元素个数) | 长度：元素个数 |
-| A3 聚合与判断 | [`sum(iterable, start=0)`](#sumiterable-start0-求和可指定起始值) | 求和，可指定起始值 |
-| A3 聚合与判断 | [`min() / max()`](#min--max-最小值--最大值) | 最小值 / 最大值 |
-| A3 聚合与判断 | [`all() / any()`](#all--any-全为真--存在真值) | 全为真 / 存在真值 |
-| A4 序列生成与迭代 | [`range(start, stop, step=1)`](#rangestart-stop-step1-生成整数序列惰性求值) | 生成整数序列（惰性求值） |
-| A4 序列生成与迭代 | [`enumerate(iterable, start=0)`](#enumerateiterable-start0-遍历时同时拿到下标和元素) | 遍历时同时拿到下标和元素 |
-| A4 序列生成与迭代 | [`zip(*iterables)`](#zipiterables-按位置把多个序列打包) | 按位置把多个序列打包 |
-| A4 序列生成与迭代 | [`iter(obj) / next(it, default)`](#iterobj--nextit-default-取迭代器逐个取值) | 取迭代器、逐个取值 |
-| A5 排序与筛选 | [`sorted(iterable, key=None, reverse=False)`](#sortediterable-keynone-reversefalse-排序返回新列表) | 排序，返回**新**列表 |
-| A5 排序与筛选 | [`reversed(seq)`](#reversedseq-反向迭代器不改原序列) | 反向迭代器（不改原序列） |
-| A5 排序与筛选 | [`filter(function, iterable)`](#filterfunction-iterable-按条件筛选元素) | 按条件筛选元素 |
-| A5 排序与筛选 | [`map(function, iterable, ...)`](#mapfunction-iterable--对每个元素做转换) | 对每个元素做转换 |
-| A5 排序与筛选 | [`slice(start, stop, step)`](#slicestart-stop-step-切片对象很少直接用) | 切片对象（很少直接用） |
-| A6 类型与属性 | [`type(obj)`](#typeobj-查看对象的类型) | 查看对象的类型 |
-| A6 类型与属性 | [`isinstance(obj, cls) / issubclass(cls, cls2)`](#isinstanceobj-cls--issubclasscls-cls2-类型判断--继承判断) | 类型判断 / 继承判断 |
-| A6 类型与属性 | [`callable(obj)`](#callableobj-判断能不能当函数调用) | 判断能不能当函数调用 |
-| A6 类型与属性 | [`hasattr / getattr / setattr / delattr`](#hasattr--getattr--setattr--delattr-属性的动态检查与读写) | 属性的动态检查与读写 |
-| A6 类型与属性 | [`id(obj) / dir(obj) / vars(obj)`](#idobj--dirobj--varsobj-内存地址--属性名--命名空间) | 内存地址 / 属性名 / 命名空间 |
-| A6 类型与属性 | [`super()`](#super-调用父类的方法) | 调用父类的方法 |
-| A7 类与装饰器 | [`@staticmethod / @classmethod / @property`](#staticmethod--classmethod--property-三种常用装饰器的用法) | 三种常用装饰器的用法 |
-| A8 字符串表示与编码 | [`repr(obj)`](#reprobj-给开发者看的可还原表示) | 给开发者看的「可还原」表示 |
-| A8 字符串表示与编码 | [`hash(obj)`](#hashobj-取哈希值dictset-的底层) | 取哈希值（dict/set 的底层） |
-| A8 字符串表示与编码 | [`bytes() / bytearray()`](#bytes--bytearray-二进制数据不可变--可变) | 二进制数据（不可变 / 可变） |
-| A9 输入输出与格式化 | [`print(*objects, sep, end)`](#printobjects-sep-end-打印输出) | 打印输出 |
-| A9 输入输出与格式化 | [`input(prompt)`](#inputprompt-读取一行输入) | 读取一行输入 |
-| A9 输入输出与格式化 | [`open(file, mode, encoding)`](#openfile-mode-encoding-打开文件配-with-自动关闭) | 打开文件（配 `with` 自动关闭） |
-| A9 输入输出与格式化 | [`format(value, spec) / f-string`](#formatvalue-spec--f-string-格式化数值和字符串) | 格式化数值和字符串 |
-| A10 动态执行与反射 | [`eval(expression) / exec(code)`](#evalexpression--execcode-把字符串当代码执行) | 把字符串当代码执行 |
-| A10 动态执行与反射 | [`compile(source, filename, mode)`](#compilesource-filename-mode-把源码编译成可执行对象) | 把源码编译成可执行对象 |
-| A10 动态执行与反射 | [`globals() / locals()`](#globals--locals-取全局--局部命名空间字典) | 取全局 / 局部命名空间字典 |
-| B1 list 列表 | [`l[i]、l[i:j]（读取与切片）`](#lilij读取与切片-按下标取值--切出一段) | 按下标取值 / 切出一段 |
-| B1 list 列表 | [`l[i] = x、l[i:j] = [...]`](#li--xlij---改单个元素--用切片批量改) | 改单个元素 / 用切片批量改 |
-| B1 list 列表 | [`l.append(x)`](#lappendx-末尾追加一个元素) | 末尾追加一个元素 |
-| B1 list 列表 | [`l.extend(it)、l += [...]`](#lextenditl---末尾批量追加拆开加) | 末尾批量追加（拆开加） |
-| B1 list 列表 | [`l.insert(i, x)`](#linserti-x-在指定位置插入元素) | 在指定位置插入元素 |
-| B1 list 列表 | [`l.remove(x)`](#lremovex-按值删除第一个匹配项) | 按**值**删除第一个匹配项 |
-| B1 list 列表 | [`l.pop(i=-1)`](#lpopi-1-按下标弹出元素并返回) | 按下标弹出元素并返回 |
-| B1 list 列表 | [`l.clear()`](#lclear-清空列表) | 清空列表 |
-| B1 list 列表 | [`del l[i]、del l[i:j]、del l`](#del-lidel-lijdel-l-按下标--切片--变量删除) | 按下标 / 切片 / 变量删除 |
-| B1 list 列表 | [`l.index(x, start, end)`](#lindexx-start-end-查值对应的下标) | 查值对应的下标 |
-| B1 list 列表 | [`l.count(x)`](#lcountx-统计值出现次数) | 统计值出现次数 |
-| B1 list 列表 | [`x in l`](#x-in-l-判断元素是否存在) | 判断元素是否存在 |
-| B1 list 列表 | [`l.reverse()`](#lreverse-原地反转) | 原地反转 |
-| B1 list 列表 | [`l.sort(key, reverse)`](#lsortkey-reverse-原地排序) | 原地排序 |
-| B1 list 列表 | [`l.copy()、l[:]、copy.deepcopy()`](#lcopylcopydeepcopy-拷贝列表浅--深) | 拷贝列表（浅 / 深） |
-| B1 list 列表 | [`列表推导式`](#列表推导式-一行生成新列表推荐写法) | 一行生成新列表（推荐写法） |
-| B1 list 列表 | [`列表的 5 个常用组合`](#列表的-5-个常用组合-去重--扁平化--反转--求和--建二维) | 去重 / 扁平化 / 反转 / 求和 / 建二维 |
-| B2 str 字符串 | [`s[i]、s[i:j]、s[::-1]`](#sisijs-1-下标与切片字符串不可改) | 下标与切片（字符串不可改） |
-| B2 str 字符串 | [`s.split(sep=None, maxsplit=-1)`](#ssplitsepnone-maxsplit-1-按分隔符切成列表) | 按分隔符切成列表 |
-| B2 str 字符串 | [`sep.join(iterable)`](#sepjoiniterable-把列表拼成字符串) | 把列表拼成字符串 |
-| B2 str 字符串 | [`s.strip() / lstrip() / rstrip()`](#sstrip--lstrip--rstrip-去掉两端空白或指定字符) | 去掉两端空白或指定字符 |
-| B2 str 字符串 | [`s.replace(old, new, count=-1)`](#sreplaceold-new-count-1-替换子串默认全部替换) | 替换子串（默认全部替换） |
-| B2 str 字符串 | [`s.find(sub) / s.index(sub)`](#sfindsub--sindexsub-找子串的位置) | 找子串的位置 |
-| B2 str 字符串 | [`s.startswith() / s.endswith()`](#sstartswith--sendswith-判断开头--结尾) | 判断开头 / 结尾 |
-| B2 str 字符串 | [`s.upper() / lower() / title() / capitalize()`](#supper--lower--title--capitalize-大小写转换) | 大小写转换 |
-| B2 str 字符串 | [`s.count(sub)`](#scountsub-统计子串出现次数) | 统计子串出现次数 |
-| B2 str 字符串 | [`sub in s`](#sub-in-s-子串判断) | 子串判断 |
-| B2 str 字符串 | [`s.zfill(n) / ljust / rjust / center`](#szfilln--ljust--rjust--center-补位对齐补零补空格) | 补位对齐（补零、补空格） |
-| B2 str 字符串 | [`s.isdigit() / isalpha() / isalnum() / isspace()`](#sisdigit--isalpha--isalnum--isspace-判断字符串内容类型) | 判断字符串内容类型 |
-| B2 str 字符串 | [`f-string 格式化`](#f-string-格式化-拼接与格式化36-首选) | 拼接与格式化（3.6+ 首选） |
-| B2 str 字符串 | [`字符串的 3 个常见套路`](#字符串的-3-个常见套路-判空--忽略大小写--处理一行输入) | 判空 / 忽略大小写 / 处理一行输入 |
-| B3 dict 字典 | [`d = {} 创建字典`](#d---创建字典-键值对的-5-种建法) | 键值对的 5 种建法 |
-| B3 dict 字典 | [`d[key] 取值`](#dkey-取值-按键取-value) | 按键取 value |
-| B3 dict 字典 | [`d.get(key, default=None)`](#dgetkey-defaultnone-安全取值推荐) | 安全取值（推荐） |
-| B3 dict 字典 | [`d[key] = value`](#dkey--value-新增或覆盖) | 新增或覆盖 |
-| B3 dict 字典 | [`d.update(other)`](#dupdateother-批量新增--覆盖) | 批量新增 / 覆盖 |
-| B3 dict 字典 | [`d.setdefault(key, default=None)`](#dsetdefaultkey-defaultnone-不存在才初始化分组神器) | 不存在才初始化（分组神器） |
-| B3 dict 字典 | [`d1 | d2（3.9+）`](#d1--d239-合并两个字典生成新对象) | 合并两个字典（生成新对象） |
-| B3 dict 字典 | [`d.keys() / d.values() / d.items()`](#dkeys--dvalues--ditems-取键--值--键值对) | 取键 / 值 / 键值对 |
-| B3 dict 字典 | [`key in d`](#key-in-d-判断键是否存在) | 判断键是否存在 |
-| B3 dict 字典 | [`d.pop(key, default)`](#dpopkey-default-弹出键并返回值) | 弹出键并返回值 |
-| B3 dict 字典 | [`d.popitem()`](#dpopitem-删掉并返回最后一个键值对) | 删掉并返回最后一个键值对 |
-| B3 dict 字典 | [`del d[k] / d.clear()`](#del-dk--dclear-删除一个键--清空字典) | 删除一个键 / 清空字典 |
-| B3 dict 字典 | [`遍历字典`](#遍历字典-3-种遍历方式--改值的正确姿势) | 3 种遍历方式 + 改值的正确姿势 |
-| B3 dict 字典 | [`d.copy() / copy.deepcopy()`](#dcopy--copydeepcopy-拷贝字典浅--深) | 拷贝字典（浅 / 深） |
-| B3 dict 字典 | [`字典推导式与 Counter`](#字典推导式与-counter-计数排行反转筛选一行搞定) | 计数、排行、反转、筛选一行搞定 |
-| B4 set 集合 | [`set() 创建集合`](#set-创建集合-去重容器无序不重复) | 去重容器：无序、不重复 |
-| B4 set 集合 | [`s.add(x)`](#saddx-加一个元素) | 加一个元素 |
-| B4 set 集合 | [`s.update(iterable)`](#supdateiterable-批量加元素) | 批量加元素 |
-| B4 set 集合 | [`s.remove(x) / s.discard(x)`](#sremovex--sdiscardx-删除元素报错--不报错) | 删除元素（报错 / 不报错） |
-| B4 set 集合 | [`s.pop() / s.clear()`](#spop--sclear-随机删一个--清空) | 随机删一个 / 清空 |
-| B4 set 集合 | [`x in s`](#x-in-s-判断元素是否存在o1) | 判断元素是否存在（O(1)） |
-| B4 set 集合 | [`a | b、a & b、a - b、a ^ b`](#a--ba--ba---ba--b-交并差集合的杀手锏) | 交并差（集合的杀手锏） |
-| B4 set 集合 | [`a.issubset / issuperset / isdisjoint`](#aissubset--issuperset--isdisjoint-包含关系判断) | 包含关系判断 |
-| B4 set 集合 | [`sorted(s)`](#sorteds-集合要按顺序看先转-list) | 集合要按顺序看：先转 list |
-| B4 set 集合 | [`去重的 3 种写法`](#去重的-3-种写法-set--dictfromkeys--嵌套去重) | set / dict.fromkeys / 嵌套去重 |
-| B5 tuple 元组 | [`t = (1, 2) 创建元组`](#t--1-2-创建元组-不可变序列方法只有-2-个) | 不可变序列，方法只有 2 个 |
-| B5 tuple 元组 | [`t[i]、t[i:j]（读取）`](#titij读取-下标与切片不能改) | 下标与切片（不能改） |
-| B5 tuple 元组 | [`t.count(x) / t.index(x)`](#tcountx--tindexx-元组只有这两个方法) | 元组只有这两个方法 |
-| B5 tuple 元组 | [`解包：a, b = t`](#解包a-b--t-把元组拆成多个变量最常用) | 把元组拆成多个变量（最常用） |
-| B5 tuple 元组 | [`重建元组（因为不可变）`](#重建元组因为不可变-要改就得造个新的) | 要「改」就得造个新的 |
-| B5 tuple 元组 | [`元组当 dict 的键 / 进 set`](#元组当-dict-的键--进-set-坐标组合键的好帮手) | 坐标、组合键的好帮手 |
-| B5 tuple 元组 | [`tuple 还是 list？`](#tuple-还是-list-一句话选择标准) | 一句话选择标准 |
+| 分类          | 用法（点击跳转）                                                                                            | 一句话作用                                               |               |
+| ----------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------- |
+| A1 类型转换     | [`int(x, base=10)`](#intx-base10-字符串数字--整数可指定进制)                                                    | 字符串/数字 → 整数，可指定进制                                   |               |
+| A1 类型转换     | [`float(x)`](#floatx-字符串数字--浮点数)                                                                    | 字符串/数字 → 浮点数                                        |               |
+| A1 类型转换     | [`str(object)`](#strobject-任意对象--字符串)                                                               | 任意对象 → 字符串                                          |               |
+| A1 类型转换     | [`bool(x)`](#boolx-任意值--true--false)                                                                | 任意值 → True / False                                  |               |
+| A1 类型转换     | [`list()、tuple()、set()、dict()`](#listtuplesetdict-四种容器互转)                                           | 四种容器互转                                              |               |
+| A1 类型转换     | [`chr(i)、ord(c)`](#chriordc-整数--字符unicode-码点)                                                       | 整数 ↔ 字符（Unicode 码点）                                 |               |
+| A1 类型转换     | [`hex(x)、oct(x)、bin(x)`](#hexxoctxbinx-整数--带前缀的进制字符串)                                               | 整数 → 带前缀的进制字符串                                      |               |
+| A2 数学与数值    | [`abs(x)`](#absx-绝对值复数是模长)                                                                          | 绝对值（复数是模长）                                          |               |
+| A2 数学与数值    | [`round(x, ndigits=0)`](#roundx-ndigits0-四舍五入银行家舍入)                                                 | 四舍五入（银行家舍入）                                         |               |
+| A2 数学与数值    | [`pow(x, y, mod=None)`](#powx-y-modnone-幂运算可带取模)                                                    | 幂运算，可带取模                                            |               |
+| A2 数学与数值    | [`divmod(a, b)`](#divmoda-b-一次拿到商和余数)                                                               | 一次拿到商和余数                                            |               |
+| A3 聚合与判断    | [`len(s)`](#lens-长度元素个数)                                                                            | 长度：元素个数                                             |               |
+| A3 聚合与判断    | [`sum(iterable, start=0)`](#sumiterable-start0-求和可指定起始值)                                            | 求和，可指定起始值                                           |               |
+| A3 聚合与判断    | [`min() / max()`](#min--max-最小值--最大值)                                                               | 最小值 / 最大值                                           |               |
+| A3 聚合与判断    | [`all() / any()`](#all--any-全为真--存在真值)                                                              | 全为真 / 存在真值                                          |               |
+| A4 序列生成与迭代  | [`range(start, stop, step=1)`](#rangestart-stop-step1-生成整数序列惰性求值)                                   | 生成整数序列（惰性求值）                                        |               |
+| A4 序列生成与迭代  | [`enumerate(iterable, start=0)`](#enumerateiterable-start0-遍历时同时拿到下标和元素)                            | 遍历时同时拿到下标和元素                                        |               |
+| A4 序列生成与迭代  | [`zip(*iterables)`](#zipiterables-按位置把多个序列打包)                                                       | 按位置把多个序列打包                                          |               |
+| A4 序列生成与迭代  | [`iter(obj) / next(it, default)`](#iterobj--nextit-default-取迭代器逐个取值)                                | 取迭代器、逐个取值                                           |               |
+| A5 排序与筛选    | [`sorted(iterable, key=None, reverse=False)`](#sortediterable-keynone-reversefalse-排序返回新列表)         | 排序，返回**新**列表                                        |               |
+| A5 排序与筛选    | [`reversed(seq)`](#reversedseq-反向迭代器不改原序列)                                                          | 反向迭代器（不改原序列）                                        |               |
+| A5 排序与筛选    | [`filter(function, iterable)`](#filterfunction-iterable-按条件筛选元素)                                    | 按条件筛选元素                                             |               |
+| A5 排序与筛选    | [`map(function, iterable, ...)`](#mapfunction-iterable--对每个元素做转换)                                   | 对每个元素做转换                                            |               |
+| A5 排序与筛选    | [`slice(start, stop, step)`](#slicestart-stop-step-切片对象很少直接用)                                       | 切片对象（很少直接用）                                         |               |
+| A6 类型与属性    | [`type(obj)`](#typeobj-查看对象的类型)                                                                     | 查看对象的类型                                             |               |
+| A6 类型与属性    | [`isinstance(obj, cls) / issubclass(cls, cls2)`](#isinstanceobj-cls--issubclasscls-cls2-类型判断--继承判断) | 类型判断 / 继承判断                                         |               |
+| A6 类型与属性    | [`callable(obj)`](#callableobj-判断能不能当函数调用)                                                          | 判断能不能当函数调用                                          |               |
+| A6 类型与属性    | [`hasattr / getattr / setattr / delattr`](#hasattr--getattr--setattr--delattr-属性的动态检查与读写)           | 属性的动态检查与读写                                          |               |
+| A6 类型与属性    | [`id(obj) / dir(obj) / vars(obj)`](#idobj--dirobj--varsobj-内存地址--属性名--命名空间)                         | 内存地址 / 属性名 / 命名空间                                   |               |
+| A6 类型与属性    | [`super()`](#super-调用父类的方法)                                                                         | 调用父类的方法                                             |               |
+| A7 类与装饰器    | [`@staticmethod / @classmethod / @property`](#staticmethod--classmethod--property-三种常用装饰器的用法)       | 三种常用装饰器的用法                                          |               |
+| A8 字符串表示与编码 | [`repr(obj)`](#reprobj-给开发者看的可还原表示)                                                                 | 给开发者看的「可还原」表示                                       |               |
+| A8 字符串表示与编码 | [`hash(obj)`](#hashobj-取哈希值dictset-的底层)                                                             | 取哈希值（dict/set 的底层）                                  |               |
+| A8 字符串表示与编码 | [`bytes() / bytearray()`](#bytes--bytearray-二进制数据不可变--可变)                                           | 二进制数据（不可变 / 可变）                                     |               |
+| A9 输入输出与格式化 | [`print(*objects, sep, end)`](#printobjects-sep-end-打印输出)                                           | 打印输出                                                |               |
+| A9 输入输出与格式化 | [`input(prompt)`](#inputprompt-读取一行输入)                                                              | 读取一行输入                                              |               |
+| A9 输入输出与格式化 | [`open(file, mode, encoding)`](#openfile-mode-encoding-打开文件配-with-自动关闭)                             | 打开文件（配 `with` 自动关闭）                                 |               |
+| A9 输入输出与格式化 | [`format(value, spec) / f-string`](#formatvalue-spec--f-string-格式化数值和字符串)                           | 格式化数值和字符串                                           |               |
+| A10 动态执行与反射 | [`eval(expression) / exec(code)`](#evalexpression--execcode-把字符串当代码执行)                              | 把字符串当代码执行                                           |               |
+| A10 动态执行与反射 | [`compile(source, filename, mode)`](#compilesource-filename-mode-把源码编译成可执行对象)                       | 把源码编译成可执行对象                                         |               |
+| A10 动态执行与反射 | [`globals() / locals()`](#globals--locals-取全局--局部命名空间字典)                                            | 取全局 / 局部命名空间字典                                      |               |
+| B1 list 列表  | [`l[i]、l[i:j]（读取与切片）`](#lilij读取与切片-按下标取值--切出一段)                                                     | 按下标取值 / 切出一段                                        |               |
+| B1 list 列表  | [`l[i] = x、l[i:j] = [...]`](#li--xlij---改单个元素--用切片批量改)                                              | 改单个元素 / 用切片批量改                                      |               |
+| B1 list 列表  | [`l.append(x)`](#lappendx-末尾追加一个元素)                                                                 | 末尾追加一个元素                                            |               |
+| B1 list 列表  | [`l.extend(it)、l += [...]`](#lextenditl---末尾批量追加拆开加)                                                | 末尾批量追加（拆开加）                                         |               |
+| B1 list 列表  | [`l.insert(i, x)`](#linserti-x-在指定位置插入元素)                                                           | 在指定位置插入元素                                           |               |
+| B1 list 列表  | [`l.remove(x)`](#lremovex-按值删除第一个匹配项)                                                               | 按**值**删除第一个匹配项                                      |               |
+| B1 list 列表  | [`l.pop(i=-1)`](#lpopi-1-按下标弹出元素并返回)                                                                | 按下标弹出元素并返回                                          |               |
+| B1 list 列表  | [`l.clear()`](#lclear-清空列表)                                                                         | 清空列表                                                |               |
+| B1 list 列表  | [`del l[i]、del l[i:j]、del l`](#del-lidel-lijdel-l-按下标--切片--变量删除)                                    | 按下标 / 切片 / 变量删除                                     |               |
+| B1 list 列表  | [`l.index(x, start, end)`](#lindexx-start-end-查值对应的下标)                                              | 查值对应的下标                                             |               |
+| B1 list 列表  | [`l.count(x)`](#lcountx-统计值出现次数)                                                                    | 统计值出现次数                                             |               |
+| B1 list 列表  | [`x in l`](#x-in-l-判断元素是否存在)                                                                        | 判断元素是否存在                                            |               |
+| B1 list 列表  | [`l.reverse()`](#lreverse-原地反转)                                                                     | 原地反转                                                |               |
+| B1 list 列表  | [`l.sort(key, reverse)`](#lsortkey-reverse-原地排序)                                                    | 原地排序                                                |               |
+| B1 list 列表  | [`l.copy()、l[:]、copy.deepcopy()`](#lcopylcopydeepcopy-拷贝列表浅--深)                                     | 拷贝列表（浅 / 深）                                         |               |
+| B1 list 列表  | [`列表推导式`](#列表推导式-一行生成新列表推荐写法)                                                                       | 一行生成新列表（推荐写法）                                       |               |
+| B1 list 列表  | [`列表的 5 个常用组合`](#列表的-5-个常用组合-去重--扁平化--反转--求和--建二维)                                                  | 去重 / 扁平化 / 反转 / 求和 / 建二维                            |               |
+| B2 str 字符串  | [`s[i]、s[i:j]、s[::-1]`](#sisijs-1-下标与切片字符串不可改)                                                      | 下标与切片（字符串不可改）                                       |               |
+| B2 str 字符串  | [`s.split(sep=None, maxsplit=-1)`](#ssplitsepnone-maxsplit-1-按分隔符切成列表)                              | 按分隔符切成列表                                            |               |
+| B2 str 字符串  | [`sep.join(iterable)`](#sepjoiniterable-把列表拼成字符串)                                                   | 把列表拼成字符串                                            |               |
+| B2 str 字符串  | [`s.strip() / lstrip() / rstrip()`](#sstrip--lstrip--rstrip-去掉两端空白或指定字符)                            | 去掉两端空白或指定字符                                         |               |
+| B2 str 字符串  | [`s.replace(old, new, count=-1)`](#sreplaceold-new-count-1-替换子串默认全部替换)                              | 替换子串（默认全部替换）                                        |               |
+| B2 str 字符串  | [`s.find(sub) / s.index(sub)`](#sfindsub--sindexsub-找子串的位置)                                         | 找子串的位置                                              |               |
+| B2 str 字符串  | [`s.startswith() / s.endswith()`](#sstartswith--sendswith-判断开头--结尾)                                 | 判断开头 / 结尾                                           |               |
+| B2 str 字符串  | [`s.upper() / lower() / title() / capitalize()`](#supper--lower--title--capitalize-大小写转换)           | 大小写转换                                               |               |
+| B2 str 字符串  | [`s.count(sub)`](#scountsub-统计子串出现次数)                                                               | 统计子串出现次数                                            |               |
+| B2 str 字符串  | [`sub in s`](#sub-in-s-子串判断)                                                                        | 子串判断                                                |               |
+| B2 str 字符串  | [`s.zfill(n) / ljust / rjust / center`](#szfilln--ljust--rjust--center-补位对齐补零补空格)                   | 补位对齐（补零、补空格）                                        |               |
+| B2 str 字符串  | [`s.isdigit() / isalpha() / isalnum() / isspace()`](#sisdigit--isalpha--isalnum--isspace-判断字符串内容类型) | 判断字符串内容类型                                           |               |
+| B2 str 字符串  | [`f-string 格式化`](#f-string-格式化-拼接与格式化36-首选)                                                         | 拼接与格式化（3.6+ 首选）                                     |               |
+| B2 str 字符串  | [`字符串的 3 个常见套路`](#字符串的-3-个常见套路-判空--忽略大小写--处理一行输入)                                                   | 判空 / 忽略大小写 / 处理一行输入                                 |               |
+| B3 dict 字典  | [`d = {} 创建字典`](#d---创建字典-键值对的-5-种建法)                                                               | 键值对的 5 种建法                                          |               |
+| B3 dict 字典  | [`d[key] 取值`](#dkey-取值-按键取-value)                                                                   | 按键取 value                                           |               |
+| B3 dict 字典  | [`d.get(key, default=None)`](#dgetkey-defaultnone-安全取值推荐)                                           | 安全取值（推荐）                                            |               |
+| B3 dict 字典  | [`d[key] = value`](#dkey--value-新增或覆盖)                                                              | 新增或覆盖                                               |               |
+| B3 dict 字典  | [`d.update(other)`](#dupdateother-批量新增--覆盖)                                                         | 批量新增 / 覆盖                                           |               |
+| B3 dict 字典  | [`d.setdefault(key, default=None)`](#dsetdefaultkey-defaultnone-不存在才初始化分组神器)                        | 不存在才初始化（分组神器）                                       |               |
+| B3 dict 字典  | [`d1                                                                                                | d2（3.9+）`](#d1--d239-合并两个字典生成新对象)                   | 合并两个字典（生成新对象） |
+| B3 dict 字典  | [`d.keys() / d.values() / d.items()`](#dkeys--dvalues--ditems-取键--值--键值对)                           | 取键 / 值 / 键值对                                        |               |
+| B3 dict 字典  | [`key in d`](#key-in-d-判断键是否存在)                                                                     | 判断键是否存在                                             |               |
+| B3 dict 字典  | [`d.pop(key, default)`](#dpopkey-default-弹出键并返回值)                                                   | 弹出键并返回值                                             |               |
+| B3 dict 字典  | [`d.popitem()`](#dpopitem-删掉并返回最后一个键值对)                                                             | 删掉并返回最后一个键值对                                        |               |
+| B3 dict 字典  | [`del d[k] / d.clear()`](#del-dk--dclear-删除一个键--清空字典)                                               | 删除一个键 / 清空字典                                        |               |
+| B3 dict 字典  | [`遍历字典`](#遍历字典-3-种遍历方式--改值的正确姿势)                                                                    | 3 种遍历方式 + 改值的正确姿势                                   |               |
+| B3 dict 字典  | [`d.copy() / copy.deepcopy()`](#dcopy--copydeepcopy-拷贝字典浅--深)                                       | 拷贝字典（浅 / 深）                                         |               |
+| B3 dict 字典  | [`字典推导式与 Counter`](#字典推导式与-counter-计数排行反转筛选一行搞定)                                                    | 计数、排行、反转、筛选一行搞定                                     |               |
+| B4 set 集合   | [`set() 创建集合`](#set-创建集合-去重容器无序不重复)                                                                 | 去重容器：无序、不重复                                         |               |
+| B4 set 集合   | [`s.add(x)`](#saddx-加一个元素)                                                                          | 加一个元素                                               |               |
+| B4 set 集合   | [`s.update(iterable)`](#supdateiterable-批量加元素)                                                      | 批量加元素                                               |               |
+| B4 set 集合   | [`s.remove(x) / s.discard(x)`](#sremovex--sdiscardx-删除元素报错--不报错)                                    | 删除元素（报错 / 不报错）                                      |               |
+| B4 set 集合   | [`s.pop() / s.clear()`](#spop--sclear-随机删一个--清空)                                                    | 随机删一个 / 清空                                          |               |
+| B4 set 集合   | [`x in s`](#x-in-s-判断元素是否存在o1)                                                                      | 判断元素是否存在（O(1)）                                      |               |
+| B4 set 集合   | [`a                                                                                                 | b、a & b、a - b、a ^ b`](#a--ba--ba---ba--b-交并差集合的杀手锏) | 交并差（集合的杀手锏）   |
+| B4 set 集合   | [`a.issubset / issuperset / isdisjoint`](#aissubset--issuperset--isdisjoint-包含关系判断)                 | 包含关系判断                                              |               |
+| B4 set 集合   | [`sorted(s)`](#sorteds-集合要按顺序看先转-list)                                                              | 集合要按顺序看：先转 list                                     |               |
+| B4 set 集合   | [`去重的 3 种写法`](#去重的-3-种写法-set--dictfromkeys--嵌套去重)                                                   | set / dict.fromkeys / 嵌套去重                          |               |
+| B5 tuple 元组 | [`t = (1, 2) 创建元组`](#t--1-2-创建元组-不可变序列方法只有-2-个)                                                     | 不可变序列，方法只有 2 个                                      |               |
+| B5 tuple 元组 | [`t[i]、t[i:j]（读取）`](#titij读取-下标与切片不能改)                                                              | 下标与切片（不能改）                                          |               |
+| B5 tuple 元组 | [`t.count(x) / t.index(x)`](#tcountx--tindexx-元组只有这两个方法)                                            | 元组只有这两个方法                                           |               |
+| B5 tuple 元组 | [`解包：a, b = t`](#解包a-b--t-把元组拆成多个变量最常用)                                                             | 把元组拆成多个变量（最常用）                                      |               |
+| B5 tuple 元组 | [`重建元组（因为不可变）`](#重建元组因为不可变-要改就得造个新的)                                                                | 要「改」就得造个新的                                          |               |
+| B5 tuple 元组 | [`元组当 dict 的键 / 进 set`](#元组当-dict-的键--进-set-坐标组合键的好帮手)                                              | 坐标、组合键的好帮手                                          |               |
+| B5 tuple 元组 | [`tuple 还是 list？`](#tuple-还是-list-一句话选择标准)                                                          | 一句话选择标准                                             |               |
 
 ---
 

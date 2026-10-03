@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Obsidian：窗口布局会一直变，不入库（其余 .obsidian 配置正常提交）
+notes/.obsidian/workspace.json
+notes/.obsidian/workspace-mobile.json
+notes/.obsidian/cache
+
+# Python
+__pycache__/
+*.pyc

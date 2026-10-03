@@ -1,7 +1,9 @@
-# assisted-learning-skills
+# xx-notes
 
-Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习资料」这类工作流。
+学习笔记 + Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习资料」这类工作流。
 每个子目录一份 `SKILL.md`，外加可选的 `references/`（规范与清单）、`scripts/`（可直接跑的脚本）。
+速查笔记统一放在 `notes/`，这个目录同时是一个 Obsidian 库（`.obsidian/` 只提交插件与外观配置，
+`workspace.json` 是窗口布局，已写进 `.gitignore`，不入库）。
 
 | 技能 | 用途 |
 |------|------|
@@ -13,14 +15,14 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 
 | 笔记 | 内容 / 状态 |
 |------|------|
-| `note/Python内置函数速查笔记.md` | Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法。**已按新格式整理并校验通过**（索引表在最前，点「用法」直接跳到正文） |
-| `note/Numpy常用函数速查笔记.md` | NumPy 创建 / 索引 / 变形 / 运算 / 统计 / 拼接 / 线代，49 条用法。**已按新格式整理并校验通过** |
-| `note/Pandas常用函数速查笔记.md` | Pandas 创建读写 / 查看 / 选择 / 清洗 / 变换 / 分组 / 合并 / 统计 / 时间 / 字符串，52 条用法。**已按新格式整理并校验通过**（pandas 3.0 的 API 变动都标了） |
-| `note/Matplotlib常用函数速查笔记.md` | Matplotlib 画布 / 折线散点柱状直方饼图箱线 / 坐标轴 / 图例 / 子图 / 样式 / 保存，29 条用法。**已按新格式整理并校验通过** |
-| `note/Seaborn常用函数速查笔记.md` | Seaborn 主题 / 关系图 / 分布图 / 分类图 / 回归图 / 矩阵图 / 网格，27 条用法。**已按新格式整理并校验通过** |
-| `note/C语言常用语法速查笔记.md` | C：程序结构 / 数据类型 / 运算符 / 分支循环 / 数组 / 字符串 / 函数 / 指针 / 结构体 / 内存 / 文件 / 标准库 / 预处理，63 条用法。每条都是**完整可编译程序**，`// 运行结果：` 是真实输出 |
-| `note/C++常用语法速查笔记.md` | C++：输入输出 / auto 与引用 / std::string / 函数进阶 / 类与对象 / 继承多态 / 运算符重载 / STL 容器与算法 / 智能指针 / 异常 / 文件流 / 现代特性，55 条用法。同样每条都是完整可编译程序 |
-| `note/MySQL常用语法速查笔记.md` | MySQL：建表 / 增删改查 / 条件 / 分组 / 连接 / 子查询 / 更新删除 / 函数 / 索引 / 事务 / 视图，43 条用法。示例下附结果表；MySQL 专有语法明确标注「未实跑」 |
+| `notes/Python内置函数速查笔记.md` | Python 内置函数 + list / str / dict / set / tuple 常用方法，104 条用法。**已按新格式整理并校验通过**（索引表在最前，点「用法」直接跳到正文） |
+| `notes/Numpy常用函数速查笔记.md` | NumPy 创建 / 索引 / 变形 / 运算 / 统计 / 拼接 / 线代，49 条用法。**已按新格式整理并校验通过** |
+| `notes/Pandas常用函数速查笔记.md` | Pandas 创建读写 / 查看 / 选择 / 清洗 / 变换 / 分组 / 合并 / 统计 / 时间 / 字符串，52 条用法。**已按新格式整理并校验通过**（pandas 3.0 的 API 变动都标了） |
+| `notes/Matplotlib常用函数速查笔记.md` | Matplotlib 画布 / 折线散点柱状直方饼图箱线 / 坐标轴 / 图例 / 子图 / 样式 / 保存，29 条用法。**已按新格式整理并校验通过** |
+| `notes/Seaborn常用函数速查笔记.md` | Seaborn 主题 / 关系图 / 分布图 / 分类图 / 回归图 / 矩阵图 / 网格，27 条用法。**已按新格式整理并校验通过** |
+| `notes/C语言常用语法速查笔记.md` | C：程序结构 / 数据类型 / 运算符 / 分支循环 / 数组 / 字符串 / 函数 / 指针 / 结构体 / 内存 / 文件 / 标准库 / 预处理，63 条用法。每条都是**完整可编译程序**，`// 运行结果：` 是真实输出 |
+| `notes/C++常用语法速查笔记.md` | C++：输入输出 / auto 与引用 / std::string / 函数进阶 / 类与对象 / 继承多态 / 运算符重载 / STL 容器与算法 / 智能指针 / 异常 / 文件流 / 现代特性，55 条用法。同样每条都是完整可编译程序 |
+| `notes/MySQL常用语法速查笔记.md` | MySQL：建表 / 增删改查 / 条件 / 分组 / 连接 / 子查询 / 更新删除 / 函数 / 索引 / 事务 / 视图，43 条用法。示例下附结果表；MySQL 专有语法明确标注「未实跑」 |
 
 「新格式」＝ 索引前置（目录与速查表合并、每行可跳转）+ 每条统一 `签名 ｜ 返回 ｜ 备注` 三格 +
 代码示例注释必须是真实输出。整理完一份就把状态改成「已整理并校验通过」，并补上它的校验命令与输出。
@@ -29,35 +31,35 @@ Hermes Agent 技能（skill）仓库，放的是「辅助学习 / 整理学习�
 
 ```bash
 # Python 那份（只依赖标准库，任何解释器都行）
-python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Python内置函数速查笔记.md
+python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py notes/Python内置函数速查笔记.md
 # 104 个代码块｜注释比对 284/284 一致｜退出码 0
 
 # Numpy 那份（示例里有 np.array(...)，要用装了 numpy 的解释器跑）
-~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Numpy常用函数速查笔记.md
+~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py notes/Numpy常用函数速查笔记.md
 # 49 个代码块｜注释比对 178/178 一致｜退出码 0
 
 # Pandas 那份（用装了 pandas 的解释器）
-~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Pandas常用函数速查笔记.md
+~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py notes/Pandas常用函数速查笔记.md
 # 52 个代码块｜注释比对 164/164 一致｜退出码 0
 
 # Matplotlib 那份（绘图示例：脚本会把后端设成 Agg，不会弹窗）
-~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Matplotlib常用函数速查笔记.md
+~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py notes/Matplotlib常用函数速查笔记.md
 # 30 个代码块｜注释比对 76/76 一致（其余是纯绘图语句，编译执行无异常即可）｜退出码 0
 
 # Seaborn 那份（示例用手工小表，离线可跑；load_dataset 那条首次需联网）
-~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py note/Seaborn常用函数速查笔记.md
+~/.venv/bin/python verified-cheatsheet-notes/scripts/verify_code_blocks.py notes/Seaborn常用函数速查笔记.md
 # 28 个代码块｜注释比对 82/82 一致｜退出码 0
 
 # C 那份（编译 + 运行，需要 cc / clang；不需要第三方库）
-python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang c note/C语言常用语法速查笔记.md
+python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang c notes/C语言常用语法速查笔记.md
 # 63 个 c 代码块｜全部编译运行通过｜退出码 0
 
 # C++ 那份（同上，编译器换成 c++ -std=c++17）
-python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang cpp note/C++常用语法速查笔记.md
+python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang cpp notes/C++常用语法速查笔记.md
 # 55 个 cpp 代码块｜全部编译运行通过｜退出码 0
 
 # MySQL 那份（可移植语句重新跑一遍并与笔记里的结果表比对；用标准库 sqlite3，不需要 mysql 服务）
-python3 verified-cheatsheet-notes/scripts/verify_sql_blocks.py note/MySQL常用语法速查笔记.md
+python3 verified-cheatsheet-notes/scripts/verify_sql_blocks.py notes/MySQL常用语法速查笔记.md
 # 复核 37 条通过 37 条；跳过 6 条（标了未实跑的 MySQL 专有语法）
 ```
 

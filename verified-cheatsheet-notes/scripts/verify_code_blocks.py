@@ -257,6 +257,9 @@ def main() -> int:
     ap.add_argument("--keep-cwd", action="store_true", help="在当前目录执行代码块（默认在临时目录）")
     args = ap.parse_args()
 
+    # 先把笔记路径解析成绝对路径：下面会 chdir 到临时目录，相对路径就找不到了
+    args.files = [str(Path(f).resolve()) for f in args.files]
+
     # 绘图类笔记：强制无界面后端，避免 plt.show() 弹窗/阻塞校验
     os.environ.setdefault("MPLBACKEND", "Agg")
 
