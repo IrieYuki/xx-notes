@@ -8,6 +8,7 @@
 | 技能 | 用途 |
 |------|------|
 | `verified-cheatsheet-notes/` | 把速查笔记整理成能长期查阅的形态，并用脚本验证示例注释与真实输出一致 |
+| `study-reference-notes/` | 用户的学习笔记写在哪、怎么写：先定位正本（`notes/`）还是链接桩，再按固定结构写速查笔记 / 刷题笔记 |
 
 ## 速查笔记
 
@@ -89,11 +90,20 @@ python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py /path/to/笔记.
 `input()` 用假 stdin 喂（不会卡住），代码块在临时目录里跑（不污染工作目录），
 `# ❌ ValueError` 这类注释表示「这行预期报错」，自动跳过比对。
 
+## study-reference-notes
+
+「笔记写在哪、怎么写」的定位与模板：先判断该改正本（本仓库 `notes/`）还是链接桩
+（`~/My_Python_Study/note/*.md` 只有几百字节、指向正本的指针），再按固定结构写
+速查笔记（索引前置 + 每条 `签名 ｜ 返回 ｜ 备注` + 真实输出注释）或 LeetCode 刷题笔记。
+`references/` 里是三份骨架与清单（条目规范、多语言分类骨架、Python 清单），
+`scripts/verify_notes_examples.py` 单独校验笔记里的示例。
+
 ## 装回本地
 
 ```bash
 mkdir -p ~/.hermes/skills/note-taking
-cp -R verified-cheatsheet-notes ~/.hermes/skills/note-taking/
+cp -R verified-cheatsheet-notes study-reference-notes ~/.hermes/skills/note-taking/
 ```
 
-本地实际安装位置：`~/.hermes/skills/note-taking/verified-cheatsheet-notes/`。
+本地实际安装位置：`~/.hermes/skills/note-taking/verified-cheatsheet-notes/`、
+`~/.hermes/skills/note-taking/study-reference-notes/`（两边内容保持一致）。
