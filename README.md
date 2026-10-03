@@ -24,6 +24,7 @@
 | `notes/C语言常用语法速查笔记.md` | C：程序结构 / 数据类型 / 运算符 / 分支循环 / 数组 / 字符串 / 函数 / 指针 / 结构体 / 内存 / 文件 / 标准库 / 预处理，63 条用法。每条都是**完整可编译程序**，`// 运行结果：` 是真实输出 |
 | `notes/C++常用语法速查笔记.md` | C++：输入输出 / auto 与引用 / std::string / 函数进阶 / 类与对象 / 继承多态 / 运算符重载 / STL 容器与算法 / 智能指针 / 异常 / 文件流 / 现代特性，55 条用法。同样每条都是完整可编译程序 |
 | `notes/MySQL常用语法速查笔记.md` | MySQL：建表 / 增删改查 / 条件 / 分组 / 连接 / 子查询 / 更新删除 / 函数 / 索引 / 事务 / 视图，43 条用法。示例下附结果表；MySQL 专有语法明确标注「未实跑」 |
+| `notes/Linux常用指令速查笔记.md` | **小白向** Linux 指令：终端与命令 / 目录路径 / 文件操作 / 看文件 / 查找搜索 / 管道与重定向 / 权限用户 / 进程作业 / 网络远程 / 压缩打包 / 系统信息，85 条用法。示例在 **Ubuntu 24.04 容器**里实跑，输出即真实输出 |
 
 「新格式」＝ 索引前置（目录与速查表合并、每行可跳转）+ 每条统一 `签名 ｜ 返回 ｜ 备注` 三格 +
 代码示例注释必须是真实输出。整理完一份就把状态改成「已整理并校验通过」，并补上它的校验命令与输出。
@@ -62,6 +63,11 @@ python3 verified-cheatsheet-notes/scripts/verify_c_blocks.py --lang cpp notes/C+
 # MySQL 那份（可移植语句重新跑一遍并与笔记里的结果表比对；用标准库 sqlite3，不需要 mysql 服务）
 python3 verified-cheatsheet-notes/scripts/verify_sql_blocks.py notes/MySQL常用语法速查笔记.md
 # 复核 37 条通过 37 条；跳过 6 条（标了未实跑的 MySQL 专有语法）
+
+# Linux 那份（命令笔记：在 Ubuntu 24.04 容器里真跑每个 bash 块，再和笔记里的结果块比对；
+# 少数网络工具只有 nicolaka/netshoot 镜像里有，脚本会自己换镜像找工具。需要本机跑着 docker/colima）
+python3 verified-cheatsheet-notes/scripts/verify_sh_blocks.py notes/Linux常用指令速查笔记.md
+# 比对 78 个块｜不一致 0 个｜结构示例 8 个（时间/PID/IP 这类每次都不一样）｜未实跑 7 个（要真网络/真主机）
 ```
 
 > 笔记全部按新格式整理完毕（2026-09）；除 Python 那份外，其余都要用装了对应工具的解释器跑校验：
@@ -82,9 +88,15 @@ python3 verified-cheatsheet-notes/scripts/verify_sql_blocks.py notes/MySQL常用
 ```bash
 python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py /path/to/笔记.md
 
-# 实例：对 My-Python-Study 仓库的 Python 速查笔记
+# 实例：本仓库的 Python 速查笔记
+python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py notes/Python内置函数速查笔记.md
 #   104 个代码块｜注释比对 284/284 一致｜退出码 0
 ```
+
+命令类笔记（Linux）用另一个脚本：`verify_sh_blocks.py` **在 Linux 容器里**跑每个 bash 块
+（macOS 的 BSD 工具输出和 Linux 不一样，不能拿 macOS 当参照），支持 `--fill` 把真实输出写回 JSONL。
+校验环境：`ubuntu:24.04`（coreutils/ps）+ `nicolaka/netshoot`（`file`/`tree`/`curl`/`ip`/`ss`/`nc`/`ping`），
+脚本会按顺序换镜像找工具；想自带一个镜像就用 `scripts/Dockerfile.linux-note` build，再用 `--images` 指定。
 
 它逐块执行 Markdown 里的 python 代码块，把 `#` 注释解析成期望值再和真实求值结果比对：
 `input()` 用假 stdin 喂（不会卡住），代码块在临时目录里跑（不污染工作目录），

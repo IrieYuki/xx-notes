@@ -80,6 +80,18 @@ the entry format must be identical everywhere, and every `#` comment must be the
   → 生成器：**每个条目开始前** `plt.close("all")` + `matplotlib.rcdefaults()`（否则注释会写成累加后的数字，
   例如 `len(ax.lines)` 写成 15 而实际是 4）；
   → 校验器：**每个代码块结束后**同样清理（`reset_plot_state()`），否则一次校验多个笔记时会出现顺序相关的假失败。
+- **Linux / 命令类笔记必须在 Linux 容器里跑**（`verify_sh_blocks.py`）：本机是 macOS，用的 BSD 工具
+  —— `stat -c`、`ls --time-style`、`head -n -2` 在 macOS 上直接报 illegal option，照 macOS 写出来的
+  「真实输出」放进 Linux 笔记就是错的。脚本在容器里跑（`LC_ALL=C` + `TZ=UTC`，工作目录固定为
+  `~/linux-lab`），示例环境的文件用 `touch -t` 固定修改时间，输出才可比对。本机 apt 源不通 → 脚本按
+  `IMAGES` 顺序换镜像找工具（`ubuntu:24.04` 有 coreutils/ps；`file`/`tree`/`less`/`curl`/`ip`/`ss`/`nc`/`ping`
+  只有 `nicolaka/netshoot` 有；netshoot 是 Alpine，**别用它跑 `ls` 之类 BusyBox 命令**）。
+- **每次都不一样的东西标「结构示例」**：时间、PID、IP、内存、进程列表这类输出没法比对 ——
+  结果块首行写「（结构示例：…）」，脚本只跑一遍确认命令不报错；需要真网络/真主机的写「（未实跑：…）」，
+  脚本跳过（和 SQL 的「MySQL 专有语法」同一套诚实标注规则，报告里「跳过」要跟「通过」分开报）。
+  生成时注意：`ls -la 目录` 里 `.` / `..` 的修改时间是「现在」，每次跑都变，别把这种输出写进要比对的结果块。
+- **在 Python 里写条目时的引号**：单行字符串里别用 ASCII 双引号包中文
+  （`"想知道"这文件..."` → `SyntaxError: invalid character '、'`），中文引号一律用「」。
 - 表格单元格里写 `|` 要转义成 `\|`，或直接用全角 `｜`。
 - **脚本只留一份正本，别跑副本**：渲染/校验一律用技能目录的绝对路径
   （`~/.hermes/skills/note-taking/verified-cheatsheet-notes/scripts/...`）。工作区里留的旧副本会**静默**产出不同结果
@@ -116,4 +128,10 @@ the entry format must be identical everywhere, and every `#` comment must be the
 - `scripts/verify_c_blocks.py` — 校验脚本（C / C++）：**编译 + 运行**代码块，比对尾部 `// 运行结果：` 注释；
   用法 `python3 scripts/verify_c_blocks.py --lang c NOTE.md` / `--lang cpp`（默认 `cc`/`c++`，`-std=c17`/`c++17`）
 - `scripts/verify_sql_blocks.py` — 校验脚本（SQL）：把 ```sql 块重跑一遍，和紧跟的 ```text 结果块比对
+- `scripts/verify_sh_blocks.py` — 校验脚本（bash / Linux 命令）：在 **Linux 容器**里真跑每个 ```bash 块，
+  和紧跟的 ```text 结果块比对；`--fill entries.jsonl` 把真实输出写回 JSONL 的 `out` 字段（生成器），
+  `--show-fixture` 打印「示例环境」块（笔记开头那份必须与脚本里的 SETUP 一字不差，脚本会核对）
+- `scripts/Dockerfile.linux-note` — 自带常用命令的 Linux 校验环境（apt 源通的地方可以
+  `docker build -t linux-note:1 -f Dockerfile.linux-note .` 后用 `--images linux-note:1`；本机 apt 不通，
+  所以默认按 `ubuntu:24.04` → `nicolaka/netshoot` 的顺序换镜像找齐工具）
 - `scripts/render_notes.py` — 渲染脚本：JSONL 条目 → 笔记文件（索引/正文/锚点同源，渲染后自查链接与围栏）

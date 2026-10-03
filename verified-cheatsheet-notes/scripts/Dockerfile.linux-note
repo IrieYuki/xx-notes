@@ -1,0 +1,12 @@
+# Linux 速查笔记的校验环境：Debian 12 + 常见命令（GNU coreutils）
+# 重建：docker build -t linux-note:1 -f Dockerfile.linux-note .
+# 校验：python3 scripts/verify_sh_blocks.py --image linux-note:1 notes/Linux常用指令速查笔记.md
+FROM debian:12
+ENV LC_ALL=C \
+    TZ=UTC \
+    DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      procps iproute2 file less curl wget python3 zip unzip \
+      netcat-openbsd iputils-ping tree \
+ && rm -rf /var/lib/apt/lists/*
