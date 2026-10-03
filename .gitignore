@@ -5,6 +5,8 @@
 notes/.obsidian/workspace.json
 notes/.obsidian/workspace-mobile.json
 notes/.obsidian/cache
+# 插件本体（第三方代码）不入库；启用了哪些插件看 community-plugins.json（它会正常提交）
+notes/.obsidian/plugins/
 
 # Python
 __pycache__/
