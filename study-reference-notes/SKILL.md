@@ -17,6 +17,7 @@ description: Use when writing/updating the user's Chinese study notes.
 - 速查笔记（Python / Numpy / Pandas / Matplotlib / Seaborn / C / C++ / MySQL 共 8 份）：
   **正本在 `~/xx/xx-notes/notes/`**（远端 `IrieYuki/xx-notes`，技能也在同仓 `verified-cheatsheet-notes/`；`notes/` 同时是 Obsidian 库）；
   `~/My_Python_Study/note/*.md` 只剩指向正本的**链接桩**（几百字节），别再往桩里写内容。
+  （`IrieYuki/My-Python-Study` 这个 GitHub 仓库 2026-10 已按用户要求删除；`~/My_Python_Study` 只是本地目录，没有远端，别往它推送。）
   改动一律在正本仓库做，改完提交推送并核对远端 blob sha。
 - LeetCode 刷题笔记：`~/My_LeetCode_Study/leetcode-notes/`，文件名两位序号前缀（`00-复杂度分析.md`、`01-刷题路线图.md`）；题解代码放 `~/My_LeetCode_Study/solutions/`
 - 附件里给的 `note/xxx.md`、`leetcode-notes/xxx.md` 是相对路径：先 `ls` 对应目录定位；开宽泛文件搜索前先限定到具体子目录。
