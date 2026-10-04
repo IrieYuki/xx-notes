@@ -11,3 +11,6 @@ notes/.obsidian/plugins/
 # Python
 __pycache__/
 *.pyc
+
+# 旧版备份（大改前本地留底，不入库）
+*.bak-旧版
