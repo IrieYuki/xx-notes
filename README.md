@@ -9,6 +9,7 @@
 |------|------|
 | `verified-cheatsheet-notes/` | 把速查笔记整理成能长期查阅的形态，并用脚本验证示例注释与真实输出一致 |
 | `study-reference-notes/` | 用户的学习笔记写在哪、怎么写：先定位正本（`notes/`）还是链接桩，再按固定结构写速查笔记 / 刷题笔记 |
+| `packet-capture/` | 抓包与过滤器速查：dumpcap / tshark / Wireshark 命令、BPF 捕获过滤器、显示过滤器、xxd 转明文（网络安全学习用，副本在 `~/.hermes/skills/security/`） |
 
 ## 速查笔记
 
@@ -113,9 +114,10 @@ python3 verified-cheatsheet-notes/scripts/verify_code_blocks.py notes/Python内�
 ## 装回本地
 
 ```bash
-mkdir -p ~/.hermes/skills/note-taking
+mkdir -p ~/.hermes/skills/note-taking ~/.hermes/skills/security
 cp -R verified-cheatsheet-notes study-reference-notes ~/.hermes/skills/note-taking/
+cp -R packet-capture ~/.hermes/skills/security/
 ```
 
 本地实际安装位置：`~/.hermes/skills/note-taking/verified-cheatsheet-notes/`、
-`~/.hermes/skills/note-taking/study-reference-notes/`（两边内容保持一致）。
+`~/.hermes/skills/note-taking/study-reference-notes/`、`~/.hermes/skills/security/packet-capture/`（两边内容保持一致）。
