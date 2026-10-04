@@ -148,7 +148,6 @@ A10 压缩与打包 → A11 系统信息与软件包
 
 **解析**　把字原样打印到屏幕（标准输出）。用来试终端是否正常、在脚本里输出提示；`echo $变量` 能直接看变量的值。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 内容 | 必填 | 要打印的字，可以多个，用空格隔开；不含空格时引号可以省略 |
@@ -161,12 +160,22 @@ A10 压缩与打包 → A11 系统信息与软件包
 
 ```bash
 echo hello linux
-echo "引号里的    多个空格也会保留"
-echo $HOME
 ```
 ```text
 hello linux
+```
+
+```bash
+echo "引号里的    多个空格也会保留"
+```
+```text
 引号里的    多个空格也会保留
+```
+
+```bash
+echo $HOME
+```
+```text
 /root
 ```
 
@@ -175,7 +184,6 @@ hello linux
 ### `man` 查命令用法：看帮助、看手册、看版本
 
 **解析**　忘了一个命令怎么用，有三条路：命令自带的 --help（快）、man 手册（全）、--version（看版本）。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -226,11 +234,15 @@ ls (GNU coreutils) 9.4
 
 ```bash
 pwd
-cd dir1
-pwd
 ```
 ```text
 /root/linux-lab
+```
+
+```bash
+cd dir1 && pwd
+```
+```text
 /root/linux-lab/dir1
 ```
 
@@ -239,7 +251,6 @@ pwd
 ### `ls` 看这个目录里有什么
 
 **解析**　列出目录里的文件和子目录。最常用的命令，不修改任何东西。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -256,7 +267,6 @@ pwd
 
 ```bash
 ls
-ls dir1
 ```
 ```text
 data.csv
@@ -270,9 +280,11 @@ run.sh
 ```
 
 ```bash
-touch .secret.txt
-ls
-ls -a
+ls dir1
+```
+
+```bash
+touch .secret.txt && ls
 ```
 ```text
 data.csv
@@ -283,6 +295,12 @@ fruit.txt
 hello.txt
 notes.txt
 run.sh
+```
+
+```bash
+touch .secret.txt && ls -a
+```
+```text
 .
 ..
 .secret.txt
@@ -327,8 +345,7 @@ drwxr-xr-x 2 root root 4.0K Jan  1  2026 dir2
 ```
 
 ```bash
-touch -t 202602020900 newer.txt
-ls -lt
+touch -t 202602020900 newer.txt && ls -lt
 ```
 ```text
 total 28
@@ -349,7 +366,6 @@ drwxr-xr-x 2 root root 4096 Jan  1  2026 dir2
 
 **解析**　切换当前目录。成功时什么都不打印；`..` 上一级、`~` 家目录、`-` 回上一个待过的目录。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 目录 | 必填 | 要去的目录；不存在会报 No such file or directory，写成了文件报 Not a directory |
@@ -363,29 +379,43 @@ drwxr-xr-x 2 root root 4096 Jan  1  2026 dir2
 
 ```bash
 pwd
-cd dir1
-pwd
-cd /etc
-pwd
 ```
 ```text
 /root/linux-lab
+```
+
+```bash
+cd dir1 && pwd
+```
+```text
 /root/linux-lab/dir1
+```
+
+```bash
+cd /etc && pwd
+```
+```text
 /etc
 ```
 
 ```bash
-cd dir1      # 进 dir1
-cd ..        # 回上一级
-pwd          # 确认回来了
-cd /etc
-cd -         # 回上一次待过的目录（cd - 会把它打印出来）
-cd           # 不带参数 = 回家目录
-pwd
+cd dir1 && cd .. && pwd
 ```
 ```text
 /root/linux-lab
+```
+
+```bash
+cd /etc && cd -
+```
+```text
 /root/linux-lab
+```
+
+```bash
+cd && pwd
+```
+```text
 /root
 ```
 
@@ -394,7 +424,6 @@ pwd
 ### `mkdir` 新建目录
 
 **解析**　创建目录；-p 可以把不存在的父目录一起建出来。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -406,9 +435,14 @@ pwd
 **操作**
 
 ```bash
-mkdir newdir
-mkdir -p a/b/c
-find . -type d | sort
+mkdir newdir && ls -1d newdir
+```
+```text
+newdir
+```
+
+```bash
+mkdir -p a/b/c && find . -type d | sort
 ```
 ```text
 .
@@ -417,7 +451,6 @@ find . -type d | sort
 ./a/b/c
 ./dir1
 ./dir2
-./newdir
 ```
 
 > ⚠️ 目录已存在时会报 `File exists`；这不是错，通常忽略即可。
@@ -425,7 +458,6 @@ find . -type d | sort
 ### `tree` 树形看目录结构（一眼看懂层级）
 
 **解析**　把目录画成一棵树，最后一行给出目录数和文件数。项目层级多时特别好用。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -461,7 +493,6 @@ tree
 
 **解析**　文件不存在就创建一个 0 字节的空文件；已存在就把修改时间刷成现在。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 文件名 | 必填 | 要建/要刷的文件，可以写多个；支持通配符（touch *.txt） |
@@ -471,8 +502,7 @@ tree
 **操作**
 
 ```bash
-touch newfile.txt
-ls -1 *.txt
+touch newfile.txt && ls -1 *.txt
 ```
 ```text
 empty.txt
@@ -488,7 +518,6 @@ notes.txt
 
 **解析**　复制文件；复制目录必须加 -r。目标已存在会直接覆盖。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 源 | 必填 | 要复制的文件或目录 |
@@ -502,9 +531,7 @@ notes.txt
 **操作**
 
 ```bash
-cp hello.txt copy.txt
-ls -1 *.txt
-cat copy.txt
+cp hello.txt copy.txt && ls -1 *.txt
 ```
 ```text
 copy.txt
@@ -512,14 +539,19 @@ empty.txt
 fruit.txt
 hello.txt
 notes.txt
+```
+
+```bash
+cp hello.txt copy.txt && cat copy.txt
+```
+```text
 hello linux
 second line
 third line
 ```
 
 ```bash
-cp -r dir1 dir1-copy
-find . -maxdepth 1 -type d | sort
+cp -r dir1 dir1-copy && find . -maxdepth 1 -type d | sort
 ```
 ```text
 .
@@ -534,7 +566,6 @@ find . -maxdepth 1 -type d | sort
 
 **解析**　同一个目录里是改名，跨目录是移动；目标已存在会静默覆盖。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 源 | 必填 | 要移动/改名的文件 |
@@ -547,8 +578,7 @@ find . -maxdepth 1 -type d | sort
 **操作**
 
 ```bash
-mv empty.txt renamed.txt
-ls -1 *.txt
+mv empty.txt renamed.txt && ls -1 *.txt
 ```
 ```text
 fruit.txt
@@ -563,7 +593,6 @@ renamed.txt
 
 **解析**　删除文件；删目录要加 -r。没有回收站，删了就是删了。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 文件名 | 必填 | 要删的文件，可以写多个 |
@@ -576,8 +605,7 @@ renamed.txt
 **操作**
 
 ```bash
-rm empty.txt
-ls -1 *.txt
+rm empty.txt && ls -1 *.txt
 ```
 ```text
 fruit.txt
@@ -586,9 +614,7 @@ notes.txt
 ```
 
 ```bash
-cp -r dir1 dir1-copy
-rm -r dir1-copy
-find . -maxdepth 1 -type d | sort
+cp -r dir1 dir1-copy && rm -r dir1-copy && find . -maxdepth 1 -type d | sort
 ```
 ```text
 .
@@ -602,7 +628,6 @@ find . -maxdepth 1 -type d | sort
 
 **解析**　给文件建一个「快捷方式」：链接只是个指针，改链接内容就是改原文件。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -s | 必填 | 建软链接；不加 -s 建的是硬链接（另一种东西，日常别碰） |
@@ -614,16 +639,25 @@ find . -maxdepth 1 -type d | sort
 **操作**
 
 ```bash
-ln -s hello.txt link.txt
-stat -c '%N' link.txt
-cat link.txt
-readlink link.txt
+ln -s hello.txt link.txt && stat -c '%N' link.txt
 ```
 ```text
 'link.txt' -> 'hello.txt'
+```
+
+```bash
+ln -s hello.txt link.txt && cat link.txt
+```
+```text
 hello linux
 second line
 third line
+```
+
+```bash
+ln -s hello.txt link.txt && readlink link.txt
+```
+```text
 hello.txt
 ```
 
@@ -632,7 +666,6 @@ hello.txt
 ### `stat` 看文件的各种详细信息
 
 **解析**　看文件的元数据：权限、大小、三个时间戳。想知道权限的数字写法（644）用它。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -658,7 +691,6 @@ stat -c '%a %U %G %s %n' hello.txt
 
 **解析**　按顺序打印文件内容；给多个文件就前后拼起来打印。只适合小文本文件。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 文件 | 必填 | 要看的文件，可以写多个 |
@@ -670,12 +702,17 @@ stat -c '%a %U %G %s %n' hello.txt
 
 ```bash
 cat hello.txt
-cat hello.txt notes.txt
 ```
 ```text
 hello linux
 second line
 third line
+```
+
+```bash
+cat hello.txt notes.txt
+```
+```text
 hello linux
 second line
 third line
@@ -689,7 +726,6 @@ login ok
 ### `less` 分页看大文件（可以上下翻、搜索）
 
 **解析**　进入分页阅读器看大文件：不一次读进内存，多大都能开。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -710,7 +746,6 @@ less hello.txt
 ### `head` 只看开头几行
 
 **解析**　打印文件前 N 行（默认前 10 行）。看文件格式、看表头用。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -736,7 +771,6 @@ login failed
 
 **解析**　打印文件最后 N 行；加 -f 就一直盯着文件，新写入的行实时显示。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -n 行数 | 10 | 打印最后几行 |
@@ -761,7 +795,6 @@ login ok
 
 **解析**　统计文件有多少行、多少单词、多少字节。wc -l 是数「有几条」的日常工具。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -l | 不写 | 只要行数（最常用） |
@@ -775,12 +808,22 @@ login ok
 
 ```bash
 wc -l notes.txt
-wc -l -w -c hello.txt
-ls | wc -l
 ```
 ```text
 3 notes.txt
+```
+
+```bash
+wc -l -w -c hello.txt
+```
+```text
  3  6 35 hello.txt
+```
+
+```bash
+ls | wc -l
+```
+```text
 8
 ```
 
@@ -789,7 +832,6 @@ ls | wc -l
 ### `nl` 带行号打印（方便讨论「第几行」）
 
 **解析**　每行前面加上行号再打印，和报错信息里的「第几行」对位置用。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -802,12 +844,17 @@ ls | wc -l
 
 ```bash
 nl hello.txt
-cat -n hello.txt
 ```
 ```text
      1	hello linux
      2	second line
      3	third line
+```
+
+```bash
+cat -n hello.txt
+```
+```text
      1	hello linux
      2	second line
      3	third line
@@ -818,7 +865,6 @@ cat -n hello.txt
 ### `diff` 比较两个文件哪里不一样
 
 **解析**　找出两个文件的差异：`<` 是左边文件的行、`>` 是右边文件的行。完全相同则什么都不打印。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -832,10 +878,11 @@ cat -n hello.txt
 **操作**
 
 ```bash
-cp hello.txt same.txt
-printf 'hello linux\nsecond line\nCHANGED\n' > other.txt
-diff hello.txt same.txt
-diff hello.txt other.txt
+cp hello.txt same.txt && diff hello.txt same.txt
+```
+
+```bash
+cp hello.txt same.txt && printf 'hello linux\nsecond line\nCHANGED\n' > other.txt && diff hello.txt other.txt
 ```
 ```text
 3c3
@@ -852,7 +899,6 @@ diff hello.txt other.txt
 
 **解析**　从某个目录出发，把所有子目录翻一遍，找出符合条件的文件。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 起点目录 | 必填 | 从哪开始找（. 表示当前目录） |
@@ -867,23 +913,25 @@ diff hello.txt other.txt
 **操作**
 
 ```bash
-find . -name '*.txt' | sort
+find . -name '*.csv'
 ```
 ```text
-./empty.txt
-./fruit.txt
-./hello.txt
-./notes.txt
+./data.csv
 ```
 
 ```bash
 find . -type d | sort
-find . -type f -name '*.csv'
 ```
 ```text
 .
 ./dir1
 ./dir2
+```
+
+```bash
+find . -type f -name '*.csv'
+```
+```text
 ./data.csv
 ```
 
@@ -892,7 +940,6 @@ find . -type f -name '*.csv'
 ### `grep` 在文件里找包含某个词的行
 
 **解析**　最常用的文本搜索：打印匹配到的整行；一行都没有就什么都不打印。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -919,10 +966,15 @@ login ok
 
 ```bash
 grep -n failed notes.txt
-grep -i LOGIN notes.txt
 ```
 ```text
 2:login failed
+```
+
+```bash
+grep -i LOGIN notes.txt
+```
+```text
 login ok
 login failed
 login ok
@@ -930,18 +982,25 @@ login ok
 
 ```bash
 grep -c ok notes.txt
-grep -v ok notes.txt
 ```
 ```text
 2
+```
+
+```bash
+grep -v ok notes.txt
+```
+```text
 login failed
 ```
 
 ```bash
-grep -rn hello . | sort
+grep -r login .
 ```
 ```text
-./hello.txt:1:hello linux
+./notes.txt:login ok
+./notes.txt:login failed
+./notes.txt:login ok
 ```
 
 > ⚠️ 退出码有意义：0 = 找到了、1 = 一行都没匹配、2 = 出错（比如文件不存在）。脚本里用 `grep -q 词 文件` 只看成败、不要输出。；递归会连 `.git`、`node_modules`、日志一起搜，又慢又乱：用 `--include='*.py'` 限定文件、`--exclude-dir=.git` 排除目录。
@@ -949,7 +1008,6 @@ grep -rn hello . | sort
 ### `which` 这个命令到底是哪个程序
 
 **解析**　查出命令对应哪个可执行文件，或它是内建命令/别名。命令「找不到」时用它排查。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -961,14 +1019,29 @@ grep -rn hello . | sort
 
 ```bash
 which ls
-command -v bash
-type ls
-type cd
 ```
 ```text
 /usr/bin/ls
+```
+
+```bash
+command -v bash
+```
+```text
 /usr/bin/bash
+```
+
+```bash
+type ls
+```
+```text
 ls is /usr/bin/ls
+```
+
+```bash
+type cd
+```
+```text
 cd is a shell builtin
 ```
 
@@ -980,7 +1053,6 @@ cd is a shell builtin
 
 **解析**　把命令的屏幕输出接进文件，文件原内容全部清掉。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 命令 | 必填 | 任何会打印东西的命令 |
@@ -991,8 +1063,7 @@ cd is a shell builtin
 **操作**
 
 ```bash
-echo "第一行" > out.txt
-cat out.txt
+echo "第一行" > out.txt && cat out.txt
 ```
 ```text
 第一行
@@ -1004,7 +1075,6 @@ cat out.txt
 
 **解析**　把输出接进文件末尾，原内容保留。写日志、往配置末尾加一行用它。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 命令 | 必填 | 任何会打印东西的命令 |
@@ -1015,9 +1085,7 @@ cat out.txt
 **操作**
 
 ```bash
-echo "第一行" > out.txt
-echo "第二行" >> out.txt
-cat out.txt
+echo "第一行" > out.txt && echo "第二行" >> out.txt && cat out.txt
 ```
 ```text
 第一行
@@ -1027,7 +1095,6 @@ cat out.txt
 ### `命令2>文件` 只把报错信息接进文件
 
 **解析**　正常输出还在屏幕，只有报错（标准错误，编号 2）被写进文件。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1039,8 +1106,7 @@ cat out.txt
 **操作**
 
 ```bash
-ls no-such-file 2> err.txt
-cat err.txt
+ls no-such-file 2> err.txt; cat err.txt
 ```
 ```text
 ls: cannot access 'no-such-file': No such file or directory
@@ -1052,7 +1118,6 @@ ls: cannot access 'no-such-file': No such file or directory
 
 **解析**　两类输出一起进文件，屏幕一片安静。写日志、排查问题时最常用。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 命令 | 必填 | 任意命令 |
@@ -1063,8 +1128,7 @@ ls: cannot access 'no-such-file': No such file or directory
 **操作**
 
 ```bash
-ls no-such-file > all.txt 2>&1
-cat all.txt
+ls no-such-file > all.txt 2>&1; cat all.txt
 ```
 ```text
 ls: cannot access 'no-such-file': No such file or directory
@@ -1075,7 +1139,6 @@ ls: cannot access 'no-such-file': No such file or directory
 ### `命令1｜命令2` 管道：把上一条的输出当输入
 
 **解析**　Linux 的招牌玩法：命令1 的输出变成命令2 的输入，屏幕上只出现命令2 的输出。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1088,12 +1151,22 @@ ls: cannot access 'no-such-file': No such file or directory
 
 ```bash
 ls -1 | wc -l
-grep ok notes.txt | wc -l
-sort fruit.txt | head -n 2
 ```
 ```text
 8
+```
+
+```bash
+grep ok notes.txt | wc -l
+```
+```text
 2
+```
+
+```bash
+sort fruit.txt | head -n 2
+```
+```text
 apple 3
 banana 5
 ```
@@ -1103,7 +1176,6 @@ banana 5
 ### `tee` 又打印到屏幕、又存进文件
 
 **解析**　管道中间的分流器：屏幕上照常显示，同时写一份进文件。调试管道时用它。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1115,8 +1187,7 @@ banana 5
 **操作**
 
 ```bash
-echo "第四行" | tee -a hello.txt
-tail -n 1 hello.txt
+echo "第四行" | tee -a hello.txt && tail -n 1 hello.txt
 ```
 ```text
 第四行
@@ -1126,7 +1197,6 @@ tail -n 1 hello.txt
 ### `sort` 排序
 
 **解析**　把输入按行排序后打印（不改原文件）。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1142,16 +1212,26 @@ tail -n 1 hello.txt
 
 ```bash
 sort fruit.txt
-sort -k2 -n fruit.txt
-printf '9\n10\n' | sort
 ```
 ```text
 apple 3
 banana 5
 cherry 7
+```
+
+```bash
+sort -k2 -n fruit.txt
+```
+```text
 apple 3
 banana 5
 cherry 7
+```
+
+```bash
+printf '9\n10\n' | sort
+```
+```text
 10
 9
 ```
@@ -1161,7 +1241,6 @@ cherry 7
 ### `uniq` 数一数每行重复出现了几次
 
 **解析**　把相邻的重复行合并，打印「次数 内容」。统计日志里谁出现最多就靠它。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1186,7 +1265,6 @@ sort notes.txt | uniq -c
 
 **解析**　把每行按分隔符切开，只打印你要的列。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -d'分隔符' | Tab | 按什么切：-d, 逗号（CSV）、-d: 冒号（/etc/passwd） |
@@ -1199,12 +1277,17 @@ sort notes.txt | uniq -c
 
 ```bash
 cut -d, -f1 data.csv
-cut -d, -f2 data.csv
 ```
 ```text
 name
 tom
 amy
+```
+
+```bash
+cut -d, -f2 data.csv
+```
+```text
 age
 18
 20
@@ -1215,7 +1298,6 @@ age
 ### `sed 's/旧/新/'` 替换文本（默认只改输出，不改文件）
 
 **解析**　把文本里的「旧」换成「新」打印出来；不加 -i 原文件一点都不变。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1243,7 +1325,6 @@ login OK
 
 **解析**　按列处理每一行再打印：默认按空格/Tab 分列，$1 第一列、$0 整行。cut 搞不定的交给它。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | '{print $2}' | 必填 | 对每一行做什么：print $2 打第 2 列、s+=$2 累加、END 块打印最终结果 |
@@ -1256,12 +1337,17 @@ login OK
 
 ```bash
 awk -F, '{print $2}' data.csv
-awk '{s+=$2} END{print s}' fruit.txt
 ```
 ```text
 age
 18
 20
+```
+
+```bash
+awk '{s+=$2} END{print s}' fruit.txt
+```
+```text
 15
 ```
 
@@ -1270,7 +1356,6 @@ age
 ### `xargs` 把上一条的输出变成下一条的参数
 
 **解析**　很多命令不读管道、只认参数（rm、cp、wc）：把上游输出的每个「词」接到下游命令后面执行。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1298,7 +1383,6 @@ printf 'hello.txt\nempty.txt\n' | xargs wc -l
 
 **解析**　修改文件/目录的权限：谁能读、谁能写、谁能执行。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | u/g/o/a | — | 给谁改：u 自己、g 同组、o 其他人、a 所有人 |
@@ -1313,20 +1397,21 @@ printf 'hello.txt\nempty.txt\n' | xargs wc -l
 **操作**
 
 ```bash
-chmod -x run.sh
-ls -l run.sh
-chmod +x run.sh
-ls -l run.sh
+chmod -x run.sh && ls -l run.sh
 ```
 ```text
 -rw-r--r-- 1 root root 34 Jan  1  2026 run.sh
+```
+
+```bash
+chmod +x run.sh && ls -l run.sh
+```
+```text
 -rwxr-xr-x 1 root root 34 Jan  1  2026 run.sh
 ```
 
 ```bash
-chmod 644 hello.txt
-chmod 755 run.sh
-stat -c '%a %n' hello.txt run.sh
+chmod 644 hello.txt && chmod 755 run.sh && stat -c '%a %n' hello.txt run.sh
 ```
 ```text
 644 hello.txt
@@ -1334,10 +1419,7 @@ stat -c '%a %n' hello.txt run.sh
 ```
 
 ```bash
-mkdir -p perm/sub
-printf 'x\n' > perm/sub/file.txt
-chmod -R 700 perm
-stat -c '%a %n' perm perm/sub perm/sub/file.txt
+mkdir -p perm/sub && printf 'x\n' > perm/sub/file.txt && chmod -R 700 perm && stat -c '%a %n' perm perm/sub perm/sub/file.txt
 ```
 ```text
 700 perm
@@ -1351,7 +1433,6 @@ stat -c '%a %n' perm perm/sub perm/sub/file.txt
 
 **解析**　改一个文件「归谁」：chown 改属主、chgrp 改组。要 root 权限（前面加 sudo）。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 用户 | 必填 | chown 的新属主（可以写 用户:组 一起改） |
@@ -1364,13 +1445,16 @@ stat -c '%a %n' perm perm/sub perm/sub/file.txt
 **操作**
 
 ```bash
-chown 1000 hello.txt
-stat -c '%u %g %n' hello.txt
-chown 1000:1000 hello.txt
-stat -c '%u %g %n' hello.txt
+chown 1000 hello.txt && stat -c '%u %g %n' hello.txt
 ```
 ```text
 1000 0 hello.txt
+```
+
+```bash
+chown 1000:1000 hello.txt && stat -c '%u %g %n' hello.txt
+```
+```text
 1000 1000 hello.txt
 ```
 
@@ -1379,7 +1463,6 @@ stat -c '%u %g %n' hello.txt
 ### `umask` 看或改新建文件的默认权限
 
 **解析**　umask 是「新建时不给哪些权限」的掩码：022 → 新文件 644、新目录 755。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1392,15 +1475,22 @@ stat -c '%u %g %n' hello.txt
 
 ```bash
 umask
-touch newfile.txt
-stat -c '%a %n' newfile.txt
-umask 077
-touch private.txt
-stat -c '%a %n' private.txt
 ```
 ```text
 0022
+```
+
+```bash
+touch newfile.txt && stat -c '%a %n' newfile.txt
+```
+```text
 644 newfile.txt
+```
+
+```bash
+umask 077 && touch private.txt && stat -c '%a %n' private.txt
+```
+```text
 600 private.txt
 ```
 
@@ -1416,10 +1506,15 @@ stat -c '%a %n' private.txt
 
 ```bash
 whoami
-id
 ```
 ```text
 root
+```
+
+```bash
+id
+```
+```text
 uid=0(root) gid=0(root) groups=0(root)
 ```
 
@@ -1428,7 +1523,6 @@ uid=0(root) gid=0(root) groups=0(root)
 ### `sudo` 用 root 权限跑一条命令
 
 **解析**　以 root 身份执行一条命令（root 是权限最大的用户）。第一次会问你自己账户的密码。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1453,7 +1547,6 @@ sudo apt update
 ### `ps` 看进程（这个终端的或整台机器的）
 
 **解析**　列出进程：PID（进程号）、TTY、TIME、CMD 几列。排查「什么在跑、什么在占资源」的第一步。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1491,7 +1584,6 @@ root        42     1  0 08:00 pts/0    00:00:00 sleep 300
 
 **解析**　按名字找进程，直接打印 PID（比 ps | grep 省事，自动跳过 grep 自己）。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 名字 | 必填 | 进程名（模糊匹配：pgrep ssh 会连 sshd 一起匹配） |
@@ -1503,9 +1595,7 @@ root        42     1  0 08:00 pts/0    00:00:00 sleep 300
 **操作**
 
 ```bash
-sleep 300 &
-sleep 300 &
-pgrep -c sleep
+sleep 300 & sleep 300 & pgrep -c sleep
 ```
 ```text
 2
@@ -1516,7 +1606,6 @@ pgrep -c sleep
 ### `top` 动态看谁在吃 CPU、内存
 
 **解析**　交互式界面实时看系统负载和进程排行；q 退出、M 按内存排、P 按 CPU 排。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1542,7 +1631,6 @@ MiB Mem :   7931.0 total,   6021.4 free,    406.0 used,   1503.6 buff/cache
 
 **解析**　给进程发信号让它退出：默认 TERM（15）请它自己退；-9 是强杀。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | PID | 必填 | 要结束的进程号（从 ps/pgrep 拿） |
@@ -1553,10 +1641,7 @@ MiB Mem :   7931.0 total,   6021.4 free,    406.0 used,   1503.6 buff/cache
 **操作**
 
 ```bash
-sleep 300 &
-kill $!
-wait $! 2>/dev/null
-echo "退出码 $?"
+sleep 300 & kill $!; wait $! 2>/dev/null; echo "退出码 $?"
 ```
 ```text
 退出码 143
@@ -1568,7 +1653,6 @@ echo "退出码 $?"
 
 **解析**　什么都不干，等够时间再继续。脚本里等服务起来时用。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 秒数 | 必填 | 睡多久；支持 1m（分钟）、2h（小时） |
@@ -1578,8 +1662,7 @@ echo "退出码 $?"
 **操作**
 
 ```bash
-sleep 2
-echo "睡完了"
+sleep 2 && echo "睡完了"
 ```
 ```text
 睡完了
@@ -1590,7 +1673,6 @@ echo "睡完了"
 ### `&、jobs、fg` 放到后台跑、把后台作业拉回来
 
 **解析**　命令末尾加 & 立刻回到提示符（命令继续跑）；jobs 看后台清单；fg 把作业拉回前台。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1604,10 +1686,10 @@ echo "睡完了"
 **操作**
 
 ```bash
-sleep 300 & sleep 300 &
-jobs
+sleep 300 & sleep 300 & jobs
 ```
 ```text
+（结构示例：作业号和 PID 每次都不同）
 [1]-  Running                 sleep 300 &
 [2]+  Running                 sleep 300 &
 ```
@@ -1617,7 +1699,6 @@ jobs
 ### `nohup` 关掉终端也别停（后台长任务）
 
 **解析**　让命令忽略「终端挂断」信号：退出 SSH 后它还继续跑。跑长任务（扫描、爬虫）时用。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1630,11 +1711,10 @@ jobs
 **操作**
 
 ```bash
-nohup sleep 300 > nohup.out 2>&1 &
-jobs
-cat nohup.out
+nohup sleep 300 > nohup.out 2>&1 & jobs && cat nohup.out
 ```
 ```text
+（结构示例：作业号和 PID 每次都不同）
 [1]+  Running                 nohup sleep 300 > nohup.out 2>&1 &
 ```
 
@@ -1645,7 +1725,6 @@ cat nohup.out
 ### `ip` 看网卡和 IP 地址
 
 **解析**　查看每张网卡的状态、MAC、IP。找 inet 那一行就是 IPv4 地址。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1683,7 +1762,6 @@ ip -o -4 addr show lo
 
 **解析**　列出处于 LISTEN 状态的 TCP 端口，看本机开了哪些服务。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -t | — | TCP（-u 是 UDP） |
@@ -1707,7 +1785,6 @@ State Recv-Q Send-Q Local Address:Port Peer Address:Port
 ### `ping` 测「通不通」（发 ICMP 包）
 
 **解析**　每秒发一个包测主机通不通，打印往返时间。排网络问题的第一步。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1735,7 +1812,6 @@ PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 
 **解析**　把 HTTP 响应的正文打到屏幕上。测试 Web 服务、看接口返回、确认状态码都用它。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | URL | 必填 | 要请求的地址 |
@@ -1750,9 +1826,7 @@ PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 **操作**
 
 ```bash
-(python3 -m http.server 8000 --directory . > /dev/null 2>&1 &)
-sleep 1
-curl -s http://127.0.0.1:8000/hello.txt
+(python3 -m http.server 8000 --directory . > /dev/null 2>&1 &) && sleep 1 && curl -s http://127.0.0.1:8000/hello.txt
 ```
 ```text
 hello linux
@@ -1766,7 +1840,6 @@ third line
 
 **解析**　把 URL 指向的文件下载到当前目录（curl 默认打到屏幕，wget 默认存文件）。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | URL | 必填 | 要下载的地址 |
@@ -1779,9 +1852,7 @@ third line
 **操作**
 
 ```bash
-(python3 -m http.server 8000 --directory . > /dev/null 2>&1 &)
-sleep 1
-wget -q -O - http://127.0.0.1:8000/fruit.txt
+(python3 -m http.server 8000 --directory . > /dev/null 2>&1 &) && sleep 1 && wget -q -O - http://127.0.0.1:8000/fruit.txt
 ```
 ```text
 apple 3
@@ -1794,7 +1865,6 @@ cherry 7
 ### `nc` 测某个端口开没开
 
 **解析**　只连不发数据（-z），看端口通不通。比 ping 更有用：很多服务器禁 ICMP，但服务其实是好的。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1820,7 +1890,6 @@ nc: connect to 127.0.0.1 port 22 (tcp) failed: Connection refused
 
 **解析**　连上远程主机，之后就在对方的 shell 里操作。exit 退出。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 用户@主机 | 必填 | 用什么账号登哪台机器（如 kali@192.168.64.2） |
@@ -1842,7 +1911,6 @@ ssh user@example.com
 ### `scp` 在本地和远程之间复制文件
 
 **解析**　把文件传过去或拉回来。写法是「谁在前谁就是源」。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1868,7 +1936,6 @@ scp report.txt kali@192.168.1.10:/tmp/
 
 **解析**　Linux 最常用的打包工具：把目录/文件打成 .tar.gz，或解开。字母记法：c 创建、t 查看、x 解开、z 用 gzip、f 指定包名。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -czf 包名 东西... | — | 打包压缩（f 后面必须紧跟包名，一般放最后） |
@@ -1881,16 +1948,14 @@ scp report.txt kali@192.168.1.10:/tmp/
 **操作**
 
 ```bash
-tar -czf bak.tar.gz dir1 hello.txt
-stat -c '%s %n' bak.tar.gz
+tar -czf bak.tar.gz dir1 hello.txt && stat -c '%s %n' bak.tar.gz
 ```
 ```text
 168 bak.tar.gz
 ```
 
 ```bash
-tar -czf bak.tar.gz dir1 hello.txt
-tar -tzf bak.tar.gz
+tar -czf bak.tar.gz dir1 hello.txt && tar -tzf bak.tar.gz
 ```
 ```text
 dir1/
@@ -1898,10 +1963,7 @@ hello.txt
 ```
 
 ```bash
-tar -czf bak.tar.gz dir1 hello.txt
-mkdir restore
-tar -xzf bak.tar.gz -C restore
-find restore -type f | sort
+tar -czf bak.tar.gz dir1 hello.txt && mkdir restore && tar -xzf bak.tar.gz -C restore && find restore -type f | sort
 ```
 ```text
 restore/hello.txt
@@ -1912,7 +1974,6 @@ restore/hello.txt
 ### `gzip、gunzip` 压缩单个文件（不是打包目录）
 
 **解析**　gzip 只能压单个文件：gzip 会把原文件替换成 文件.gz，gunzip 反向还原。压目录要用 tar -czf。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1926,14 +1987,16 @@ restore/hello.txt
 **操作**
 
 ```bash
-cp hello.txt gz-demo.txt
-gzip gz-demo.txt
-ls -1 gz-demo.txt.gz
-gunzip gz-demo.txt.gz
-ls -1 gz-demo.txt
+cp hello.txt gz-demo.txt && gzip gz-demo.txt && ls -1 gz-demo.txt.gz
 ```
 ```text
 gz-demo.txt.gz
+```
+
+```bash
+cp hello.txt gz-demo.txt && gzip gz-demo.txt && gunzip gz-demo.txt.gz && ls -1 gz-demo.txt
+```
+```text
 gz-demo.txt
 ```
 
@@ -1942,7 +2005,6 @@ gz-demo.txt
 ### `zip、unzip` 跨平台压缩包（给 Windows 用）
 
 **解析**　Windows 不认 .tar.gz：和 Windows 交换文件用 zip。需要先装：sudo apt install zip unzip。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -1986,7 +2048,6 @@ VERSION_ID="24.04"
 
 **解析**　打印内核名、主机名、内核版本、CPU 架构。装软件包前先看一眼架构，下载错架构是最常见的低级错误。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -a | — | 全部信息 |
@@ -2008,7 +2069,6 @@ Linux hostname 6.8.0-117-generic #117-Ubuntu SMP PREEMPT_DYNAMIC aarch64 GNU/Lin
 ### `df` 看磁盘还剩多少空间
 
 **解析**　一行一个分区：容量、已用、可用、使用率、挂载点。「磁盘满了」靠它定位。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -2033,7 +2093,6 @@ tmpfs            64M     0   64M   0% /dev
 
 **解析**　统计目录占用的磁盘空间。磁盘满了想知道是谁占的：du -sh * | sort -h（最大的在最后）。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | -s | 常用 | 只给总计，不列子目录 |
@@ -2046,10 +2105,15 @@ tmpfs            64M     0   64M   0% /dev
 
 ```bash
 du -sh .
-du -sh dir1
 ```
 ```text
 32K	.
+```
+
+```bash
+du -sh dir1
+```
+```text
 4.0K	dir1
 ```
 
@@ -2058,7 +2122,6 @@ du -sh dir1
 ### `free` 看内存和 swap 使用情况
 
 **解析**　打印总内存、已用、空闲、缓存以及 swap 用量；重点看 available 列。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -2089,10 +2152,15 @@ Swap:          2.0Gi          0B       2.0Gi
 
 ```bash
 echo $PATH
-echo "$PATH" | tr ':' '\n'
 ```
 ```text
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+```
+
+```bash
+echo "$PATH" | tr ':' '\n'
+```
+```text
 /usr/local/sbin
 /usr/local/bin
 /usr/sbin
@@ -2107,7 +2175,6 @@ echo "$PATH" | tr ':' '\n'
 
 **解析**　export 设环境变量（子进程能看见）；alias 造命令快捷写法。都只对当前终端有效，长期生效写进 ~/.bashrc。
 
-
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
 | 名字=值 | 必填 | export 的变量（echo $名字 查看，env 里也在） |
@@ -2118,15 +2185,23 @@ echo "$PATH" | tr ':' '\n'
 **操作**
 
 ```bash
-export SITE=dvwa
-echo $SITE
-alias ll='ls -l'
-alias ll
-env | grep '^SITE='
+export SITE=dvwa && echo $SITE
 ```
 ```text
 dvwa
+```
+
+```bash
+alias ll='ls -l' && alias ll
+```
+```text
 alias ll='ls -l'
+```
+
+```bash
+export SITE=dvwa && env | grep '^SITE='
+```
+```text
 SITE=dvwa
 ```
 
@@ -2135,7 +2210,6 @@ SITE=dvwa
 ### `apt` 装、卸软件（Debian、Ubuntu、Kali 系）
 
 **解析**　Debian 系的软件包管理器：update 刷新清单、install 安装、search 搜索、remove 卸载。
-
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
@@ -2150,10 +2224,16 @@ SITE=dvwa
 
 ```bash
 sudo apt update
+```
+```text
+（未实跑：需要 root + 网络；在 Kali/Ubuntu 上直接敲就行）
+```
+
+```bash
 sudo apt install -y tree
 ```
 ```text
-（未实跑：需要 root + 网络。注意 `apt update`（只刷新清单）和 `apt upgrade`（真升级已装的包）是两件事，生产环境别随手 upgrade）
+（未实跑：需要 root + 网络）
 ```
 
 ## 学习建议

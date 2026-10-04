@@ -91,7 +91,7 @@ def render(jsonl_path: str, out_path: str) -> dict:
         out.append(f"**解析**　{e['desc']}\n")
         params = e.get("params") or []
         if params:
-            out.append("\n| 参数 | 默认值 | 作用 |")
+            out.append("| 参数 | 默认值 | 作用 |")
             out.append("|------|--------|------|")
             for p in params:
                 out.append(f"| {p[0]} | {p[1]} | {p[2]} |")

@@ -42,6 +42,9 @@ the entry format must be identical everywhere, and every `#` comment must be the
    `**操作**`（示例，可多组，组间空行） → `> ⚠️ 提醒`（要点和易错点合并写这里，没有就不写）。
    JSONL 字段：`{cat, name, one, desc, params, ret, code, warn?, out?}`；
    Linux 命令类条目合并同命令的多个选项成一条，用 `ops: [{code, out}, ...]` 渲染多组示例。
+   操作区排版（用户要求）：Linux 每组 ops **一行命令紧跟它自己的输出块**（状态连续的用 `&&` 并成一行，
+   独立演示拆成多个 op；输出用 `--fill` 回填）；Python 代码块里**语句组之间空行隔开**
+   （按 ast 顶层语句分组插空行，输出注释黏在所属语句后面，小标题注释黏到下一语句）。
 5. **锚点要对得上**：链接目标 = 标题的 GitHub slug（保留 `isalnum()` 与 `-_`、空格转 `-`、其余丢弃）。
    slug 必须唯一 → 方法名带接收者前缀（`l.append` / `d.pop` / `s.add`），否则 list/dict/set 的 `pop` 会撞车。
    **双端兼容（v2 新规则）**：用户用 Obsidian + gfm-heading-links 插件看笔记，插件的 slug 会把连续空白和

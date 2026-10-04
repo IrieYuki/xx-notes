@@ -179,37 +179,39 @@ def cmd_verify(files, args):
 
 
 def cmd_fill(path: str, args):
-    """把每个 entry 的 code 真跑一遍，把真实 stdout 写回 out 字段。"""
+    """把每个 entry 的 code（或 ops 里的每组 code）真跑一遍，把真实 stdout 写回 out 字段。"""
     src = Path(path)
     recs = [json.loads(l) for l in src.read_text(encoding="utf-8").splitlines() if l.strip()]
     filled = kept = failed = 0
     for r in recs:
         if r.get("kind") != "entry":
             continue
-        out = r.get("out")
-        if out and out.strip().startswith(UNRUN_MARK):
-            kept += 1
-            print(f"  跳过（未实跑）{r['name']}")
-            continue
-        ok, stdout, stderr, msg, image = run_block(r["code"], args.timeout, args.images)
-        if not ok:
-            failed += 1
-            print(f"  ✗ {r['name']}: {msg}")
-            continue
-        if msg:
-            print(f"  ⚠ {r['name']}: {msg}")
-        actual = norm(stdout or "")
-        if out and out.strip().startswith(STRUCT_MARK):
-            kept += 1
-            print(f"  ✓ 跑通（结构示例，保留手写结果块）{r['name']}｜{image}")
-            continue
-        if not actual:
-            r.pop("out", None)
-            print(f"  ✓ {r['name']}（无输出）｜{image}")
-        else:
-            r["out"] = actual
-            print(f"  ✓ {r['name']}（{len(actual.splitlines())} 行输出）｜{image}")
-        filled += 1
+        items = r.get("ops") or [{"code": r["code"], "out": r.get("out", "")}]
+        for op in items:
+            out = op.get("out")
+            if out and out.strip().startswith(UNRUN_MARK):
+                kept += 1
+                print(f"  跳过（未实跑）{r['name']}")
+                continue
+            ok, stdout, stderr, msg, image = run_block(op["code"], args.timeout, args.images)
+            if not ok:
+                failed += 1
+                print(f"  ✗ {r['name']}: {msg}")
+                continue
+            if msg:
+                print(f"  ⚠ {r['name']}: {msg}")
+            actual = norm(stdout or "")
+            if out and out.strip().startswith(STRUCT_MARK):
+                kept += 1
+                print(f"  ✓ 跑通（结构示例，保留手写结果块）{r['name']}｜{image}")
+                continue
+            if not actual:
+                op.pop("out", None)
+                print(f"  ✓ {r['name']}（无输出）｜{image}")
+            else:
+                op["out"] = actual
+                print(f"  ✓ {r['name']}（{len(actual.splitlines())} 行输出）｜{image}")
+            filled += 1
     src.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in recs) + "\n", encoding="utf-8")
     print(f"\n写入 {src}：填了 {filled} 条｜结构示例/未实跑 {kept} 条｜跑不通 {failed} 条")
     return 1 if failed else 0
