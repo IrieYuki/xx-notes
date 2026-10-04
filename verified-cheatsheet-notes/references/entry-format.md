@@ -57,6 +57,9 @@ Linux / 命令类笔记的差异：
 - 解析末尾加「**记：**」词源标注帮助记忆（用户要求）：`rm = remove`、`tar = tape archive`、
   `sudo = superuser do`、`grep = g/re/p（ed 编辑器的全局正则打印）`、`awk = 三位作者姓氏首字母` 这类；
   纯字面词（tree、kill、sleep）不用标。
+- 参数表里的**选项同样能标**（用户要求）：作用列末尾加 `（记：a = all）`、`（记：r = recursive）`、
+  `（记：f = force）`、`（记：h = human-readable）`、`（记：v = verbose）`；
+  只标有助记忆的，`-name`、`-type` 这类字面词和「文件」「目录」这类位置参数不用标。
 
 ## 索引表
 
