@@ -97,10 +97,11 @@ def render(jsonl_path: str, out_path: str) -> dict:
                 out.append(f"| {p[0]} | {p[1]} | {p[2]} |")
             out.append("")
         out.append(f"返回：{e['ret']}\n")
-        out.append("**操作**")
-        out.append("")
         ops = e.get("ops")
+        code = e.get("code", "")
         if ops:
+            out.append("**操作**")
+            out.append("")
             for k, op in enumerate(ops):
                 out.append(f"```{fence}")
                 out.append(op["code"].strip("\n"))
@@ -110,9 +111,11 @@ def render(jsonl_path: str, out_path: str) -> dict:
                     out.append(op["out"].strip("\n"))
                     out.append("```")
                 out.append("")
-        else:
+        elif code:
+            out.append("**操作**")
+            out.append("")
             out.append(f"```{fence}")
-            out.append(e["code"].strip("\n"))
+            out.append(code.strip("\n"))
             out.append("```")
             if e.get("out"):
                 out.append("```text")
